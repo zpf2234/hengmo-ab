@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "a_mechanism_result",
+  "archetype": "a_mechanism_result",
+  "core_claim": "约束边界触发临界事件，并由独立分辨率路线验证结果闭合",
+  "ten_second_takeaway": "临界事件发生后响应转折，复核误差进入报告阈值",
+  "read_order": ["机制与边界", "共享事件时刻", "结果与误差闭合"],
+  "data_linkage": {
+    "source_fields": ["time", "boundary_margin", "response", "resolution", "error"],
+    "element_links": ["边界余量零点->临界事件", "临界事件->响应转折", "响应结论->独立误差闭合"]
+  },
+  "signature_checks": {
+    "integrated_narrative": true,
+    "adds_explanatory_responsibility": true,
+    "not_palette_only": true,
+    "not_decorative_collage": true
+  },
+  "evidence": {
+    "mechanism": {"boundary_equation": "g(x,t)=0", "event": "首次边界交会"},
+    "event_series": {
+      "x": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      "boundary_margin": [1.2, 0.9, 0.55, 0.18, 0.0, -0.08, -0.12, -0.13, -0.14],
+      "response": [0.15, 0.22, 0.33, 0.48, 0.72, 0.83, 0.87, 0.88, 0.88],
+      "critical_x": 4
+    },
+    "closure_series": {
+      "resolution": [20, 40, 80, 160, 320],
+      "error": [0.018, 0.007, 0.0025, 0.00082, 0.00027],
+      "error_definition": "|t_c(h)-t_c(ref)| / s",
+      "report_threshold": 0.001
+    }
+  }
+}

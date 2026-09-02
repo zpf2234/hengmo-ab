@@ -1,0 +1,6 @@
+interface:
+  display_name: "CUMCM 优秀论文写作"
+  short_description: "先提交目录大纲和页数供确认，再依据证据撰写审查单一总稿"
+  default_prompt: "Use $cumcm-paper to present the full outline and page plan first, wait for my approval, and only then draft the audited CUMCM paper."
+policy:
+  allow_implicit_invocation: true

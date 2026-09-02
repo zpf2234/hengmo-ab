@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "kind": "uncertainty_decision_linkage",
+  "archetype": "cross_type_uncertainty_decision",
+  "core_claim": "样本量增加使不确定性上界收缩，并在同一阈值事件处改变最优策略",
+  "ten_second_takeaway": "样本量达到80后风险降至容限内，策略由保守切换为均衡",
+  "read_order": ["观察不确定性收缩", "识别风险阈值穿越", "读取策略价值交叉与切换"],
+  "data_linkage": {
+    "source_fields": ["sample_size", "uncertainty_upper", "conservative_value", "balanced_value", "aggressive_value"],
+    "element_links": ["样本量->风险上界", "风险阈值->切换事件", "同一事件->策略价值交叉"]
+  },
+  "signature_checks": {
+    "integrated_narrative": true,
+    "adds_explanatory_responsibility": true,
+    "not_palette_only": true,
+    "not_decorative_collage": true
+  },
+  "evidence": {
+    "sample_size": [20, 30, 40, 60, 80, 120, 180, 260],
+    "uncertainty": [0.31, 0.25, 0.21, 0.155, 0.118, 0.09, 0.068, 0.052],
+    "policy_values": {
+      "保守策略": [51, 54, 56, 58, 59, 60, 60.5, 61],
+      "均衡策略": [39, 44, 49, 56, 61, 66, 69, 71],
+      "进取策略": [22, 30, 37, 46, 54, 63, 70, 75]
+    },
+    "switches": [
+      {"n": 80, "uncertainty_threshold": 0.118, "label": "风险达标：保守→均衡"},
+      {"n": 180, "uncertainty_threshold": 0.068, "label": "信息充分：均衡→进取"}
+    ]
+  }
+}

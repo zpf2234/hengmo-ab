@@ -1,0 +1,378 @@
+{
+  "schema_version": "1.0.0",
+  "catalog_id": "cumcm-ab-archetype-routing",
+  "scope": {
+    "contest": "CUMCM",
+    "problem_letters": ["A", "B"],
+    "quality_target": "national_first_candidate",
+    "calibration_years": [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+    "routing_keys": [
+      "research_object",
+      "state_evolution",
+      "observation_structure",
+      "decision_variables",
+      "constraints",
+      "uncertainty",
+      "required_deliverable"
+    ],
+    "routing_key_excludes": ["problem_letter", "algorithm_popularity", "paper_length"],
+    "same_problem_answer_leakage_forbidden": true
+  },
+  "selection_policy": {
+    "principle": "minimum_sufficient_method",
+    "priority_order": [
+      "analytic_or_direct",
+      "complete_enumeration_or_exact_small_algorithm",
+      "classical_statistical_or_deterministic_optimization",
+      "complex_nonlinear_or_stochastic_search",
+      "machine_learning_or_neural_model_when_data_and_validation_require"
+    ],
+    "simple_method_wins_when": [
+      "all_frozen_hard_thresholds_pass",
+      "question_deliverables_are_complete",
+      "independent_validation_passes",
+      "difference_from_complex_candidate_is_within_numerical_or_sampling_uncertainty"
+    ],
+    "complexity_upgrade_requires": [
+      "named_simple_candidate_failure_on_predeclared_metric",
+      "complex_candidate_fixes_that_failure",
+      "independent_validation_gain_exceeds_uncertainty",
+      "additional_complexity_risks_are_checked",
+      "parameters_stopping_rules_and_reproduction_cost_are_recorded"
+    ],
+    "algorithm_label_has_no_score": true
+  },
+  "candidate_roles": ["baseline", "main_candidate", "heterogeneous_challenge", "fallback"],
+  "claim_levels": {
+    "L4_exact_global": {
+      "allowed_claims": ["exact_global_optimum"],
+      "minimum_evidence": [
+        "complete_enumeration_or_mathematical_proof",
+        "convex_duality_certificate_or_branch_and_bound_gap",
+        "feasibility_recheck",
+        "numerical_tolerance_report"
+      ]
+    },
+    "L3_certified": {
+      "allowed_claims": ["certified_near_optimal", "simultaneously_certified_feasible"],
+      "minimum_evidence": [
+        "valid_bound_or_simultaneous_probability_guarantee",
+        "closed_error_budget",
+        "independent_recheck"
+      ]
+    },
+    "L2_best_known": {
+      "allowed_claims": ["best_known", "near_optimal_candidate"],
+      "minimum_evidence": [
+        "multiple_initializations_or_methods",
+        "expanded_neighborhood_or_candidate_pool",
+        "small_instance_calibration",
+        "stopping_rule_and_feasibility_recheck"
+      ]
+    },
+    "L1_estimate": {
+      "allowed_claims": ["estimate", "simulation_result", "exploratory_trend"],
+      "minimum_evidence": [
+        "reproducible_estimator",
+        "uncertainty_or_error_report",
+        "scope_and_limitations"
+      ]
+    }
+  },
+  "algorithm_contracts": {
+    "adaptive_ode": {
+      "use_when": ["continuous_state_dynamics", "initial_value_problem"],
+      "required_evidence": [
+        "relative_tolerance",
+        "absolute_tolerance",
+        "maximum_step",
+        "event_handling",
+        "independent_integrator_or_analytic_case"
+      ],
+      "claim_limit": "numerical_solution_with_reported_discretization_error"
+    },
+    "pde_discretization": {
+      "use_when": ["spatial_field", "conservation_or_transport_law"],
+      "required_evidence": [
+        "boundary_discretization",
+        "mesh_refinement",
+        "time_step_refinement_if_applicable",
+        "conservation_residual",
+        "solver_tolerance"
+      ],
+      "claim_limit": "field_solution_with_mesh_and_model_error_budget"
+    },
+    "nonlinear_inverse": {
+      "use_when": ["indirect_observation", "unknown_physical_parameter"],
+      "required_evidence": [
+        "synthetic_parameter_recovery",
+        "multiple_initializations",
+        "profile_likelihood_or_equivalent_identifiability_check",
+        "residual_structure",
+        "measurement_error_propagation"
+      ],
+      "claim_limit": "identified_parameter_or_supported_interval"
+    },
+    "statistical_learning": {
+      "use_when": ["labeled_or_response_data", "enough_independent_samples"],
+      "required_evidence": [
+        "leakage_safe_split",
+        "simple_baseline",
+        "frozen_validation_metric",
+        "calibration_or_residual_diagnostics",
+        "complexity_ablation"
+      ],
+      "claim_limit": "held_out_performance_with_declared_population_scope"
+    },
+    "exact_or_certified_optimization": {
+      "use_when": ["explicit_decision_variables", "explicit_objective", "explicit_constraints"],
+      "required_evidence": [
+        "feasible_incumbent",
+        "best_bound_or_proof",
+        "optimality_gap",
+        "constraint_residuals",
+        "solver_status_and_tolerances"
+      ],
+      "claim_limit": "L4_exact_global_or_L3_certified"
+    },
+    "local_nonlinear_optimization": {
+      "use_when": ["smooth_continuous_variables", "nonconvexity_possible"],
+      "required_evidence": [
+        "variable_scaling",
+        "constraint_handling",
+        "multiple_initializations",
+        "gradient_or_finite_difference_check",
+        "local_refinement_and_feasibility_recheck"
+      ],
+      "claim_limit": "L2_best_known_unless_global_certificate_exists"
+    },
+    "metaheuristic_search": {
+      "use_when": ["complex_nonconvex_or_combinatorial_search", "exact_route_intractable_within_budget"],
+      "required_evidence": [
+        "encoding_and_repair_rule",
+        "population_or_temperature_settings",
+        "multiple_seed_distribution",
+        "explicit_stopping_rule",
+        "local_refinement",
+        "small_instance_exact_calibration",
+        "expanded_search_space_check"
+      ],
+      "claim_limit": "L2_best_known"
+    },
+    "monte_carlo": {
+      "use_when": ["explicit_random_source", "uncertainty_propagation_or_probability_estimation"],
+      "required_evidence": [
+        "uncertainty_source",
+        "sampling_plan",
+        "sample_size_rationale",
+        "seed_policy",
+        "interval_method",
+        "variance_or_effective_sample_size",
+        "stopping_rule",
+        "multiplicity_control_for_multi_candidate_selection",
+        "independent_confirmation_for_adaptive_selection"
+      ],
+      "claim_limit": "L3_certified_only_with_valid_simultaneous_control_otherwise_L1_estimate"
+    },
+    "multi_criteria_evaluation": {
+      "use_when": ["question_explicitly_requires_composite_evaluation_or_ranking"],
+      "required_evidence": [
+        "indicator_semantics_and_direction",
+        "dimension_and_redundancy_check",
+        "weight_source",
+        "alternative_normalization",
+        "weight_perturbation",
+        "rank_stability_or_rank_interval"
+      ],
+      "claim_limit": "ranking_under_declared_value_system"
+    }
+  },
+  "archetypes": [
+    {
+      "id": "TRANSFER",
+      "name": "传热传质与连续介质",
+      "problem_signature": ["temperature_or_concentration_field", "flux_boundary", "conservation_law"],
+      "baseline_families": ["dimensional_analysis", "steady_state_or_lumped_balance"],
+      "main_candidate_families": ["ode_balance", "heat_or_mass_pde", "reaction_kinetics", "adaptive_ode", "pde_discretization"],
+      "heterogeneous_challenges": ["analytic_special_case", "independent_discretization", "energy_or_mass_balance"],
+      "required_validation": ["mesh_or_step_convergence", "boundary_condition_audit", "conservation_residual", "parameter_uncertainty_propagation"],
+      "hard_rejections": ["missing_boundary_source", "unconverged_grid", "reported_precision_exceeds_error_budget"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2018A", "2020A"]
+    },
+    {
+      "id": "DYNAMICS_CONTROL",
+      "name": "动力学与控制",
+      "problem_signature": ["position_velocity_force", "damping_or_control_input", "continuous_state_evolution"],
+      "baseline_families": ["reduced_degree_of_freedom", "linearized_analytic_case"],
+      "main_candidate_families": ["newton_euler", "lagrange_dynamics", "state_space", "adaptive_ode", "stiff_ode", "optimal_control"],
+      "heterogeneous_challenges": ["energy_or_momentum_check", "independent_integrator", "limiting_case"],
+      "required_validation": ["tolerance_convergence", "event_location_error", "state_constraint_check", "parameter_identifiability"],
+      "hard_rejections": ["unlocated_contact_event", "unstable_coarse_step", "unidentified_dynamic_parameters"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2019A", "2019B", "2022A", "2024A", "2025A"]
+    },
+    {
+      "id": "GEOMETRY_KINEMATICS",
+      "name": "几何、运动学与碰撞",
+      "problem_signature": ["coordinate_angle_curve_surface", "trajectory_intersection", "collision_or_clearance"],
+      "baseline_families": ["hand_checkable_geometry", "bounding_volume", "local_linearization"],
+      "main_candidate_families": ["coordinate_transform", "parametric_curve_surface", "spline", "root_bracketing", "continuous_collision_detection"],
+      "heterogeneous_challenges": ["independent_geometry_implementation", "analytic_small_case", "interval_bracketing"],
+      "required_validation": ["coordinate_invariance", "sampling_refinement", "root_residual", "endpoint_and_tangency_cases"],
+      "hard_rejections": ["sample_only_collision_claim", "mixed_coordinate_frames", "unchecked_tangency"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2019B", "2021A", "2022B", "2024A"]
+    },
+    {
+      "id": "OPTICS_COVERAGE",
+      "name": "光学、可见性与时空覆盖",
+      "problem_signature": ["reflection_refraction_or_line_of_sight", "occlusion", "spatial_or_temporal_coverage"],
+      "baseline_families": ["two_dimensional_section", "no_occlusion_or_centerline_approximation"],
+      "main_candidate_families": ["vector_ray_model", "ray_tracing", "visibility_region", "occlusion_union", "space_time_coverage"],
+      "heterogeneous_challenges": ["analytic_ray_case", "independent_visibility_implementation", "boundary_event_refinement"],
+      "required_validation": ["occlusion_boundary_convergence", "continuous_domain_gap_check", "geometry_factor_isolation", "coverage_measure_recheck"],
+      "hard_rejections": ["confounded_topology_and_geometry", "sample_coverage_used_as_continuous_guarantee", "unverified_shadow_union"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2023A", "2023B", "2025A", "2025B"]
+    },
+    {
+      "id": "INVERSE_SIGNAL",
+      "name": "参数反演与信号处理",
+      "problem_signature": ["indirect_observation", "unknown_physical_parameter", "spectral_phase_or_time_signal"],
+      "baseline_families": ["linearized_estimator", "peak_spacing_or_moment_estimator", "single_parameter_profile"],
+      "main_candidate_families": ["nonlinear_inverse", "weighted_likelihood", "regularized_inverse", "bayesian_inverse", "fft_phase_processing", "state_estimation"],
+      "heterogeneous_challenges": ["synthetic_recovery", "alternative_information_estimator", "profile_likelihood", "multiple_initializations"],
+      "required_validation": ["identifiability", "residual_structure", "parameter_correlation", "measurement_error_propagation"],
+      "hard_rejections": ["fit_score_only", "strong_parameter_aliasing_hidden", "single_point_precision_without_interval"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2019A", "2020A", "2022A", "2022B", "2025B"]
+    },
+    {
+      "id": "EXPERIMENT_REGRESSION",
+      "name": "试验分析、回归与试验设计",
+      "problem_signature": ["multi_factor_experiment", "response_and_interaction", "batch_or_repeated_measurement"],
+      "baseline_families": ["descriptive_statistics", "main_effect_linear_model"],
+      "main_candidate_families": ["anova", "glm_or_gam", "nonlinear_regression", "mixed_effects", "response_surface", "robust_or_sparse_regression"],
+      "heterogeneous_challenges": ["held_out_or_grouped_validation", "bootstrap", "batch_effect_model", "additional_experiment_design"],
+      "required_validation": ["independent_sampling_unit_check", "residual_diagnostics", "interaction_support", "extrapolation_distance"],
+      "hard_rejections": ["pseudoreplication", "unsupported_high_order_interaction", "correlation_presented_as_mechanistic_causation"],
+      "claim_ceiling": "L2_best_known",
+      "historical_calibration": ["2021B"]
+    },
+    {
+      "id": "PREDICT_CLASSIFY",
+      "name": "预测、分类与状态识别",
+      "problem_signature": ["future_or_unseen_target", "class_probability_or_numeric_forecast", "labeled_data"],
+      "baseline_families": ["mean_or_persistence", "linear_or_logistic_regression"],
+      "main_candidate_families": ["time_series_state_space", "glm_or_gam", "tree_ensemble", "svm", "statistical_learning"],
+      "heterogeneous_challenges": ["strict_holdout", "rolling_origin", "calibration_curve", "complexity_ablation"],
+      "required_validation": ["leakage_audit", "tail_error", "calibration", "population_shift_check"],
+      "hard_rejections": ["test_set_tuning", "random_split_for_future_prediction", "complex_model_without_stable_gain", "small_sample_method_selected_by_slogan"],
+      "claim_ceiling": "L2_best_known",
+      "historical_calibration": []
+    },
+    {
+      "id": "SPATIAL_SURFACE",
+      "name": "空间插值与曲面重建",
+      "problem_signature": ["scattered_spatial_measurements", "terrain_or_surface", "continuous_field_required"],
+      "baseline_families": ["nearest_neighbor", "plane_or_low_order_surface", "triangulation"],
+      "main_candidate_families": ["spline", "radial_basis_function", "kriging_or_gaussian_process", "local_polynomial_surface"],
+      "heterogeneous_challenges": ["leave_location_out_validation", "alternative_interpolator", "mesh_refinement"],
+      "required_validation": ["spatial_cross_validation", "boundary_behavior", "convex_hull_extrapolation_check", "resolution_sensitivity"],
+      "hard_rejections": ["random_split_spatial_leakage", "unsupported_outside_hull_extrapolation", "surface_roughness_unchecked"],
+      "claim_ceiling": "L2_best_known",
+      "historical_calibration": ["2021A", "2023A", "2023B"]
+    },
+    {
+      "id": "GRAPH_RESOURCE",
+      "name": "图、路径、资源与状态决策",
+      "problem_signature": ["nodes_edges_or_states", "path_or_reachability", "resource_consumption"],
+      "baseline_families": ["greedy_rule", "shortest_path", "small_network_manual_solution"],
+      "main_candidate_families": ["dijkstra_or_astar", "network_flow_or_matching", "dynamic_programming", "resource_constrained_shortest_path", "markov_decision_process"],
+      "heterogeneous_challenges": ["small_instance_enumeration", "dominance_pruning_recheck", "alternative_state_encoding"],
+      "required_validation": ["state_sufficiency", "path_feasibility", "bound_or_exact_small_case", "expanded_state_space"],
+      "hard_rejections": ["history_dependent_problem_collapsed_to_static_graph", "unproved_pruning", "resource_rounding_changes_feasibility"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2020B", "2023B", "2024B"]
+    },
+    {
+      "id": "SCHEDULE_ALLOCATE",
+      "name": "调度、分配与组合优化",
+      "problem_signature": ["jobs_machines_locations_or_assignments", "logical_or_capacity_constraints", "discrete_decisions"],
+      "baseline_families": ["dispatch_rule", "linear_relaxation", "simple_feasible_incumbent"],
+      "main_candidate_families": ["linear_or_quadratic_programming", "milp_or_miqp", "constraint_programming", "network_flow", "column_generation", "branch_and_bound"],
+      "heterogeneous_challenges": ["small_instance_exact_solution", "relaxation_bound", "alternative_formulation", "expanded_neighborhood"],
+      "required_validation": ["full_constraint_recheck", "best_bound_and_gap", "solver_status", "candidate_space_expansion"],
+      "hard_rejections": ["heuristic_stability_called_global", "hidden_candidate_pool_restriction", "solution_reported_without_action_plan"],
+      "claim_ceiling": "L4_exact_global",
+      "historical_calibration": ["2018B", "2024B"]
+    },
+    {
+      "id": "QUALITY_DECISION",
+      "name": "抽样、质量与序贯决策",
+      "problem_signature": ["defect_rate_or_acceptance", "sampling_risk", "recursive_cost_or_sequential_action"],
+      "baseline_families": ["fixed_sample_binomial_test", "complete_small_policy_enumeration"],
+      "main_candidate_families": ["exact_binomial_or_hypergeometric", "sequential_probability_ratio_test", "bayesian_decision", "decision_tree", "dynamic_programming", "reliability_model"],
+      "heterogeneous_challenges": ["type_one_two_error_recheck", "risk_curve", "extreme_probability_case", "small_state_exact_enumeration"],
+      "required_validation": ["probability_definition_consistency", "risk_constraint", "policy_feasibility", "cost_recursion_recheck"],
+      "hard_rejections": ["confidence_posterior_confusion", "expected_cost_optimized_while_risk_constraint_ignored", "normal_approximation_in_invalid_tail"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2020B", "2024B"]
+    },
+    {
+      "id": "STOCHASTIC_SIM",
+      "name": "随机仿真与概率约束",
+      "problem_signature": ["explicit_random_source", "uncertainty_propagation", "probability_constraint_or_event_system"],
+      "baseline_families": ["analytic_mean_variance", "deterministic_scenarios"],
+      "main_candidate_families": ["monte_carlo", "quasi_monte_carlo", "latin_hypercube", "discrete_event_simulation", "sample_average_approximation", "scenario_optimization"],
+      "heterogeneous_challenges": ["independent_random_implementation", "variance_reduction_comparison", "analytic_moment_check", "independent_confirmation_sample"],
+      "required_validation": ["sample_size_convergence", "interval_coverage", "seed_policy", "multiplicity_control_if_selecting_candidates", "optional_stopping_validity"],
+      "hard_rejections": ["simulation_without_random_mechanism", "zero_observed_failure_called_zero_probability", "pointwise_intervals_used_for_global_selection"],
+      "claim_ceiling": "L3_certified",
+      "historical_calibration": ["2018B", "2020B"]
+    },
+    {
+      "id": "ROBUST_MULTIOBJ",
+      "name": "鲁棒、多目标与复杂优化",
+      "problem_signature": ["multiple_objectives", "uncertain_parameters_or_scenarios", "continuous_or_mixed_decisions"],
+      "baseline_families": ["nominal_single_objective", "extreme_scenarios"],
+      "main_candidate_families": ["epsilon_constraint", "pareto_front", "robust_optimization", "distributionally_robust_optimization", "chance_constraint", "cvar", "local_nonlinear_optimization", "exact_or_certified_optimization", "metaheuristic_search"],
+      "heterogeneous_challenges": ["alternative_optimizer", "small_instance_exact_solution", "held_out_scenarios", "expanded_search_space"],
+      "required_validation": ["feasibility_recheck", "bound_or_claim_downgrade", "weight_or_budget_sensitivity", "scenario_holdout", "multiple_seed_distribution_if_stochastic_search"],
+      "hard_rejections": ["arbitrary_weight_sum_as_unique_truth", "single_run_metaheuristic_global_claim", "robust_only_on_training_scenarios", "uncontrolled_chance_constraint"],
+      "claim_ceiling": "L4_exact_global",
+      "historical_calibration": ["2018A", "2019A", "2019B", "2020A", "2021A", "2021B", "2022A", "2023A", "2024A", "2025A"]
+    },
+    {
+      "id": "EVALUATION_RANKING",
+      "name": "综合评价、排序与分群",
+      "problem_signature": ["explicit_composite_evaluation", "multiple_indicators", "ranking_efficiency_or_grouping"],
+      "baseline_families": ["single_indicator", "dominance_relation", "equal_weight"],
+      "main_candidate_families": ["principal_component_or_factor", "entropy_weight", "topsis", "ahp", "data_envelopment_analysis", "clustering", "multi_criteria_evaluation"],
+      "heterogeneous_challenges": ["alternative_normalization", "weight_perturbation", "indicator_deletion", "external_criterion"],
+      "required_validation": ["indicator_semantics", "direction_and_dimension", "weight_source", "rank_stability_or_tie_interval"],
+      "hard_rejections": ["evaluation_method_without_evaluation_task", "ahp_without_expert_basis_or_consistency", "dea_with_too_few_units", "unstable_rank_reported_as_exact"],
+      "claim_ceiling": "L2_best_known",
+      "historical_calibration": []
+    }
+  ],
+  "historical_problem_index": [
+    {"problem": "2018A", "routes": ["TRANSFER", "INVERSE_SIGNAL", "ROBUST_MULTIOBJ"]},
+    {"problem": "2018B", "routes": ["SCHEDULE_ALLOCATE", "GRAPH_RESOURCE", "STOCHASTIC_SIM"]},
+    {"problem": "2019A", "routes": ["DYNAMICS_CONTROL", "INVERSE_SIGNAL", "ROBUST_MULTIOBJ"]},
+    {"problem": "2019B", "routes": ["DYNAMICS_CONTROL", "GEOMETRY_KINEMATICS", "ROBUST_MULTIOBJ"]},
+    {"problem": "2020A", "routes": ["TRANSFER", "INVERSE_SIGNAL", "ROBUST_MULTIOBJ"]},
+    {"problem": "2020B", "routes": ["GRAPH_RESOURCE", "QUALITY_DECISION", "STOCHASTIC_SIM"]},
+    {"problem": "2021A", "routes": ["GEOMETRY_KINEMATICS", "SPATIAL_SURFACE", "ROBUST_MULTIOBJ"]},
+    {"problem": "2021B", "routes": ["EXPERIMENT_REGRESSION", "ROBUST_MULTIOBJ"]},
+    {"problem": "2022A", "routes": ["DYNAMICS_CONTROL", "INVERSE_SIGNAL", "ROBUST_MULTIOBJ"]},
+    {"problem": "2022B", "routes": ["GEOMETRY_KINEMATICS", "INVERSE_SIGNAL"]},
+    {"problem": "2023A", "routes": ["OPTICS_COVERAGE", "SPATIAL_SURFACE", "ROBUST_MULTIOBJ"]},
+    {"problem": "2023B", "routes": ["SPATIAL_SURFACE", "OPTICS_COVERAGE", "GRAPH_RESOURCE"]},
+    {"problem": "2024A", "routes": ["GEOMETRY_KINEMATICS", "DYNAMICS_CONTROL", "ROBUST_MULTIOBJ"]},
+    {"problem": "2024B", "routes": ["QUALITY_DECISION", "GRAPH_RESOURCE", "SCHEDULE_ALLOCATE"]},
+    {"problem": "2025A", "routes": ["DYNAMICS_CONTROL", "OPTICS_COVERAGE", "ROBUST_MULTIOBJ"]},
+    {"problem": "2025B", "routes": ["OPTICS_COVERAGE", "INVERSE_SIGNAL"]}
+  ]
+}

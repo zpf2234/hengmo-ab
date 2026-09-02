@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "year": 2022,
+  "problem": "A",
+  "title": "波浪能最大输出功率设计",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A001", "file": "最终效果/高教杯优秀论文/(A001)波浪能装置输出功率优化设计.pdf"},
+    {"id": "A022", "file": "最终效果/高教杯优秀论文/(A022)波浪能装置输出功率最大化模型+.pdf"},
+    {"id": "A171", "file": "最终效果/高教杯优秀论文/(A171)基于解析和数值方法的波浪能发电装置最大功率求解.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "垂荡运动模型：40 个波浪周期内浮子与振子的位移和速度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "恒定阻尼情形 100s 时浮子垂荡位移",
+          "unit": "m",
+          "values": {"A171": -0.0836},
+          "reference_value": -0.0836,
+          "tolerance": {"type": "absolute", "value": 0.01},
+          "confidence": "low",
+          "source_note": "A171 摘要（拉普拉斯变换解析解）：浮子位移 -0.0836m、速度 -0.643m/s，振子位移 -0.084m、速度 -0.6042m/s",
+          "notes": "A001/A022 结果在正文表格未入摘要；单源但为解析解，可靠性较高"
+        }
+      ],
+      "qualitative_criteria": ["数值解与解析解应相互印证；瞬态衰减后浮子与振子趋于同频稳态振动"]
+    },
+    {
+      "question": 2,
+      "task": "仅垂荡时使 PTO 平均输出功率最大的直线阻尼系数（恒定与幂律两种）",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "恒定阻尼下最大平均输出功率",
+          "unit": "W",
+          "values": {"A001": 229.6819, "A022": 229.334, "A171": 229.334},
+          "reference_value": 229.4,
+          "tolerance": {"type": "relative", "value": 0.01},
+          "confidence": "high",
+          "source_note": "三源摘要：229.68/229.334/229.334，散布 0.15%"
+        },
+        {
+          "quantity": "恒定阻尼最优阻尼系数",
+          "unit": "N*s/m",
+          "values": {"A001": 37639, "A022": 37193.812, "A171": 37193.81},
+          "reference_value": 37200,
+          "tolerance": {"type": "relative", "value": 0.03},
+          "confidence": "high",
+          "source_note": "三源摘要：37639/37193.812/37193.81；A022 与 A171 由解析式独立得到相同值"
+        },
+        {
+          "quantity": "幂律阻尼下最大平均输出功率",
+          "unit": "W",
+          "values": {"A001": 230.0163, "A022": 230.127, "A171": 228.89},
+          "reference_value": 229.7,
+          "tolerance": {"type": "relative", "value": 0.01},
+          "confidence": "high",
+          "source_note": "三源摘要：230.02/230.13/228.89",
+          "notes": "幂律参数（比例系数 8.1e4-1e5、幂指数 0.34-0.40）为平坦极值面上的多解，不设参数检查"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "垂荡加纵摇耦合运动模型：位移、速度、角位移、角速度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "100s 时浮子纵摇角位移",
+          "unit": "rad",
+          "values": {"A171": -0.0022},
+          "reference_value": -0.0022,
+          "tolerance": {"type": "absolute", "value": 0.002},
+          "confidence": "low",
+          "source_note": "A171 摘要：浮子垂荡位移 -0.0501m、垂荡速度 -0.9466m/s、纵摇角位移 -0.0022、角速度 0.0401/s",
+          "notes": "单源；量级判据为主——纵摇角为 1e-3 rad 量级小角度"
+        }
+      ],
+      "qualitative_criteria": ["纵摇角位移为小角度（1e-2 rad 以内），垂荡与纵摇弱耦合可分离处理（A022 的近似论证）"]
+    },
+    {
+      "question": 4,
+      "task": "垂荡加纵摇下直线与旋转阻尼器联合优化的最大总输出功率",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "最大总平均输出功率",
+          "unit": "W",
+          "values": {"A001": 316.5807, "A022": 322.128, "A171": 327.96},
+          "reference_value": 322.0,
+          "tolerance": {"type": "relative", "value": 0.04},
+          "confidence": "high",
+          "source_note": "三源摘要：316.58/322.13/327.96，散布 3.5%"
+        },
+        {
+          "quantity": "最优直线阻尼系数",
+          "unit": "N*s/m",
+          "values": {"A001": 58944, "A022": 59300, "A171": 62140},
+          "reference_value": 60000,
+          "tolerance": {"type": "relative", "value": 0.06},
+          "confidence": "medium",
+          "source_note": "三源摘要：58944/5.93e4/62140"
+        },
+        {
+          "quantity": "最优旋转阻尼系数",
+          "unit": "N*s*m",
+          "values": {"A001": 98227, "A022": 100000, "A171": 95541},
+          "reference_value": 98000,
+          "tolerance": {"type": "relative", "value": 0.06},
+          "confidence": "medium",
+          "source_note": "三源摘要：98227/100000/95541；上限 100000 附近"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值取自 2022 年国赛 A 题三篇优秀论文摘要文本层，非官方标准答案；问题 2/4 的最大功率三源高度一致（含独立解析解印证），构成强数值基准。"
+}

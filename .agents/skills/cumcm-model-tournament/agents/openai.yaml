@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 模型竞技场"
+  short_description: "按同口径证据竞技候选模型，选择最小充分方法并约束结论强度"
+  default_prompt: "Use $cumcm-model-tournament to compare baseline, main, heterogeneous challenge, and fallback models under frozen evidence criteria."
+
+policy:
+  allow_implicit_invocation: true

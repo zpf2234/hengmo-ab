@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 结果验证"
+  short_description: "组织逐问最终答案、独立验证、稳健性分析以及模型适用边界"
+  default_prompt: "Use $cumcm-results-validation to close every question with evidence and validation."
+
+policy:
+  allow_implicit_invocation: true

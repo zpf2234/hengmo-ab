@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "fixture_id": "private-paper-2-anonymized-defect-profile",
+  "purpose": "defect_regression_only",
+  "source": {
+    "sha256": "DA8ED525A5393D084262039568A43A6D2BD0E1F62B0CC181B71084B557593A8F",
+    "user_authorized_as_regression_sample": true,
+    "content_policy": "Do not copy the PDF, title, authors, answer values, prose, figures, or tables into the skill suite."
+  },
+  "observed_document_facts": {
+    "total_pages": 18,
+    "legacy_pages_before_references": 17,
+    "official_body_pages": null,
+    "official_body_boundary_verified": false,
+    "equation_count": 40,
+    "figure_count": 11,
+    "table_count": 6,
+    "appendix_present": false
+  },
+  "expected_defects": [
+    {
+      "id": "DEPTH_PAGE_FEEDBACK_FAIL",
+      "severity": "blocking_for_national_first_candidate",
+      "evidence": "The legacy pre-reference estimate is 17 pages, but the official body boundary cannot be verified because no appendix start exists; the project 20-page quality gate is not met on auditable evidence.",
+      "detector_status": "existing_page_gate_should_consume"
+    },
+    {
+      "id": "RAW_MARKDOWN_IN_COMPILED_PDF",
+      "severity": "blocking",
+      "evidence": "A raw Markdown bold marker is visible on compiled page 14.",
+      "detector_status": "pending_compiled_pdf_text_lint"
+    },
+    {
+      "id": "DANGLING_APPENDIX_REFERENCE",
+      "severity": "blocking",
+      "evidence": "The document directs the reader to an appendix, but no appendix is present.",
+      "detector_status": "pending_cross_destination_gate"
+    },
+    {
+      "id": "BOUNDARY_COMPARISON_CONFOUNDED",
+      "severity": "blocking",
+      "evidence": "A boundary-condition comparison changes topology and geometry together, so the reported difference cannot be attributed to one factor.",
+      "detector_status": "pending_semantic_evidence_gate"
+    },
+    {
+      "id": "ADAPTIVE_MULTI_CANDIDATE_MONTE_CARLO_UNCONTROLLED",
+      "severity": "blocking",
+      "evidence": "An adaptive screen evaluates 539 candidate frontier points, prunes 491 after 400 samples per point, and relies on pointwise intervals without a declared simultaneous error budget or independent confirmation set.",
+      "detector_status": "covered_by_new_model_catalog_contract_not_yet_by_artifact_auditor"
+    },
+    {
+      "id": "GLOBAL_OPTIMUM_OVERCLAIM",
+      "severity": "blocking",
+      "evidence": "A global-optimum claim is stronger than the available search, probability-certification, and bound evidence.",
+      "detector_status": "covered_by_new_claim_taxonomy_not_yet_by_artifact_auditor"
+    }
+  ],
+  "expected_overall_status": "FAIL",
+  "privacy_note": "This fixture stores only anonymized defect traits and aggregate counts."
+}

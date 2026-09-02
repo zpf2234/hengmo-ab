@@ -1,0 +1,6 @@
+interface:
+  display_name: "CUMCM 优秀论文审查"
+  short_description: "审查国赛论文的模型择优、答案充分性、证据追溯、原创性与提交合规"
+  default_prompt: "Use $cumcm-review to audit model selection, answer sufficiency, traceability, originality, and submission compliance."
+policy:
+  allow_implicit_invocation: true

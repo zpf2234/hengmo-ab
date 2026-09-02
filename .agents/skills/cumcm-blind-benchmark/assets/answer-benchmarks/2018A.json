@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "year": 2018,
+  "problem": "A",
+  "title": "高温作业专用服装设计",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A229", "file": "最终效果/高教杯优秀论文/（A229）基于非稳态导热的高温作业专用服装设计.pdf", "note": "与 A401 为同一篇论文的重复文件，只计一个独立来源"},
+    {"id": "A440", "file": "最终效果/高教杯优秀论文/（A440）高温作业服设计.pdf"},
+    {"id": "A466", "file": "最终效果/高教杯优秀论文/（A466）高温作业专用服装设计.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "建立四层介质热传导模型，反演换热系数并计算 90 分钟温度分布（problem1.xlsx）",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "外界与 I 层对流换热系数 h_I",
+          "unit": "W/(m^2*K)",
+          "values": {"A229": null, "A440": 113.0, "A466": 117.41},
+          "reference_value": 115.0,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "medium",
+          "source_note": "A440 摘要给 113，A466 摘要给 117.41；A229 摘要未给数值",
+          "notes": "参数辨识结果依赖拟合目标，散布约 4%"
+        },
+        {
+          "quantity": "IV 层与皮肤对流换热系数 h_IV",
+          "unit": "W/(m^2*K)",
+          "values": {"A229": null, "A440": 8.344, "A466": 8.36},
+          "reference_value": 8.35,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "high",
+          "source_note": "A440 摘要 8.344（含辐射修正 8.496），A466 摘要 8.36，两源独立一致"
+        }
+      ]
+    },
+    {
+      "question": 2,
+      "task": "环境 65°C、IV 层 5.5mm、工作 60 分钟约束下求 II 层最优（最小）厚度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "II 层最优厚度",
+          "unit": "mm",
+          "values": {"A229": 19.3, "A440": 17.5, "A466": 17.6},
+          "reference_value": 17.6,
+          "tolerance": {"type": "relative", "value": 0.06},
+          "confidence": "medium",
+          "source_note": "A440 摘要 17.5，A466 摘要 17.6（超 44°C 时长 281s）；A229 摘要 19.3 偏保守",
+          "notes": "17.5/17.6 两源一致；A229 的 19.3 来自不同最优准则与较粗搜索，视为上界参考"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "环境 80°C、工作 30 分钟约束下求 II 层与 IV 层最优厚度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "II 层最优厚度",
+          "unit": "mm",
+          "values": {"A229": 21.7, "A440": 19.2, "A466": 19.3},
+          "reference_value": 19.3,
+          "tolerance": {"type": "relative", "value": 0.06},
+          "confidence": "medium",
+          "source_note": "A440 摘要 19.2，A466 摘要 19.3（超 44°C 时长 290s）；A229 摘要 21.7 离群",
+          "notes": "19.2/19.3 两源一致"
+        },
+        {
+          "quantity": "IV 层最优厚度",
+          "unit": "mm",
+          "values": {"A229": 6.4, "A440": 6.4, "A466": 6.4},
+          "reference_value": 6.4,
+          "tolerance": {"type": "absolute", "value": 0.4},
+          "confidence": "high",
+          "source_note": "三个独立来源摘要一致给出 6.4mm"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值取自 2018 年国赛 A 题优秀论文摘要文本层，属获奖论文交叉共识而非官方标准答案；A229 与 A401 为重复文件仅计一源。多源一致条目 confidence=high，散布明显条目降级并在 notes 说明。"
+}

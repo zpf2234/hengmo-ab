@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "year": 2024,
+  "problem": "A",
+  "title": "“板凳龙”闹元宵",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A053", "file": "最终效果/高教杯优秀论文/(A053)基于目标优化的板凳龙形态调节.pdf", "note": "摘要单位标注混乱（cm 应为 m），数值按 m 解读"},
+    {"id": "A163", "file": "最终效果/高教杯优秀论文/(A163)基于几何模型的板凳龙运动路径问题.pdf", "note": "摘要未含数值，结果在正文与 result 文件"},
+    {"id": "A242", "file": "最终效果/高教杯优秀论文/(A242)基于动态搜索的“板凳龙”运动状态及路线研究.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "螺距 55cm 等距螺线盘入时各把手位置与速度（result1.xlsx）",
+      "evaluation_mode": "numeric",
+      "qualitative_criteria": [
+        "龙头前把手沿螺线以 1m/s 恒速行进，由弧长-极角关系（微分方程或积分反解）定位，后续把手用板长弦约束递推",
+        "速度由位置差分或速度递推公式获得且龙头速度恒为 1m/s，结果精确到 6 位小数存入 result1.xlsx",
+        "评估者应用独立实现抽查若干时刻（如 t=60s、300s）的把手坐标"
+      ]
+    },
+    {
+      "question": 2,
+      "task": "确定舞龙队不发生板凳间碰撞的最晚盘入时刻",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "碰撞终止时刻",
+          "unit": "s",
+          "values": {"A053": 412.47, "A242": 412.473838},
+          "reference_value": 412.47,
+          "tolerance": {"type": "absolute", "value": 1.0},
+          "confidence": "high",
+          "source_note": "A053 摘要 412.47s（分离轴定理检测）；A242 摘要 412.473838s（角点-把手连线距离检测），两源独立方法一致",
+          "notes": "首次碰撞发生在龙头附近板凳与外圈板凳之间（两源均论证）"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "使龙头可盘入至调头空间（直径 9m）边界的最小螺距",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "最小螺距",
+          "unit": "m",
+          "values": {"A053": 0.4504, "A242": 0.450337},
+          "reference_value": 0.4503,
+          "tolerance": {"type": "absolute", "value": 0.005},
+          "confidence": "high",
+          "source_note": "A053 摘要 45.04cm；A242 摘要 0.450337m（粒子群+变步长搜索），两源一致",
+          "notes": "A163 用二分法（十分法）求同一临界螺距，方法一致数值在正文"
+        }
+      ]
+    },
+    {
+      "question": 4,
+      "task": "S 形调头曲线（两段相切圆弧）设计与调头前后各把手运动状态",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "调头曲线总长度",
+          "unit": "m",
+          "values": {"A053": 12.5109},
+          "reference_value": 12.51,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "low",
+          "source_note": "A053 摘要 12.5109（单位标 cm 应为 m）；A242 证明在给定相切约束下调头曲线长度为常数、无法通过调整两弧半径比缩短",
+          "notes": "A163 亦证明无法缩短。两源的不可缩短结论与 A053 的优化结果兼容（默认几何即最优附近）"
+        }
+      ],
+      "qualitative_criteria": ["调头路径为与盘入/盘出螺线及调头空间边界相切的两段圆弧 S 曲线，位置递推需分段（盘入螺线/弧 1/弧 2/盘出螺线）讨论"]
+    },
+    {
+      "question": 5,
+      "task": "所有把手速度不超过 2m/s 约束下龙头的最大行进速度",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "龙头最大行进速度",
+          "unit": "m/s",
+          "values": {"A053": 1.33, "A242": 1.246266},
+          "reference_value": 1.29,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "medium",
+          "source_note": "A053 摘要 1.33（粒子群）；A242 摘要 1.246266（三分搜索，最大速度出现在龙头进入盘出螺线段 [14s,15s]）",
+          "notes": "两源差 6.7%，来自全队最大速度把手的定位与时间离散精度差异"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值取自 2024 年国赛 A 题优秀论文摘要文本层，非官方标准答案；问题 2 终止时刻与问题 3 最小螺距两源独立方法一致，构成强数值基准。"
+}

@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "year": 2020,
+  "problem": "A",
+  "title": "炉温曲线",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A070", "file": "最终效果/高教杯优秀论文/（A070）炉温曲线的机理建模与优化设计.pdf"},
+    {"id": "A147", "file": "最终效果/高教杯优秀论文/（A147）基于一维热传导方程的炉温曲线机理模型研究.pdf"},
+    {"id": "A195", "file": "最终效果/高教杯优秀论文/（A195）基于一维热传导方程的回焊炉炉温模型.pdf"},
+    {"id": "A212", "file": "最终效果/高教杯优秀论文/（A212）回焊炉温曲线优化控制.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "给定温区设定与过炉速度 78cm/min 下计算焊接区域中心温度（四个检查位置）",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "小温区 3 中点温度",
+          "unit": "degC",
+          "values": {"A070": 129.7557, "A147": 138.92, "A195": 129.1007, "A212": 129.0153},
+          "reference_value": 129.3,
+          "tolerance": {"type": "relative", "value": 0.03},
+          "confidence": "medium",
+          "source_note": "A070/A195/A212 聚在 129.0-129.8，A147 为 138.92 离群",
+          "notes": "三源一致值约 129.3；A147 的参数辨识口径不同"
+        },
+        {
+          "quantity": "小温区 6 中点温度",
+          "unit": "degC",
+          "values": {"A070": 167.9916, "A147": 172.24, "A195": 166.8982, "A212": 163.9644},
+          "reference_value": 167.0,
+          "tolerance": {"type": "relative", "value": 0.04},
+          "confidence": "medium",
+          "source_note": "四源摘要 163.96-172.24，中位约 167.4"
+        },
+        {
+          "quantity": "小温区 7 中点温度",
+          "unit": "degC",
+          "values": {"A070": 189.6012, "A147": 190.17, "A195": 188.6547, "A212": 174.8322},
+          "reference_value": 189.5,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "medium",
+          "source_note": "A070/A147/A195 聚在 188.7-190.2，A212 为 174.8 离群"
+        },
+        {
+          "quantity": "小温区 8 结束处温度",
+          "unit": "degC",
+          "values": {"A070": 223.8698, "A147": 223.16, "A195": 222.6252, "A212": 207.8417},
+          "reference_value": 223.2,
+          "tolerance": {"type": "relative", "value": 0.04},
+          "confidence": "medium",
+          "source_note": "A070/A147/A195 聚在 222.6-223.9，A212 离群"
+        }
+      ]
+    },
+    {
+      "question": 2,
+      "task": "给定温区设定下满足制程界限的最大过炉速度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "最大过炉速度",
+          "unit": "cm/min",
+          "values": {"A070": 76.298, "A147": 76.0, "A195": 80.068, "A212": 77.85},
+          "reference_value": 77.0,
+          "tolerance": {"type": "relative", "value": 0.06},
+          "confidence": "medium",
+          "source_note": "四源摘要 76.0/76.30/80.07/77.85",
+          "notes": "结果强依赖问题 1 辨识参数；76-80 均被评为优秀"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "以超 217°C 至峰值覆盖面积最小为目标优化温区温度与过炉速度",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "最小阴影面积",
+          "unit": "degC*s",
+          "values": {"A070": 447.983, "A195": 483.5632, "A212": 406.2318},
+          "reference_band": {"low": 406.0, "high": 484.0},
+          "better_direction": "lower",
+          "confidence": "medium",
+          "source_note": "A070 447.98（退火）、A195 483.56（遗传）、A212 406.23（退火）；A147 未给面积仅给速度 95cm/min",
+          "notes": "启发式求解水平带；显著低于 406 需复核制程界限可行性"
+        }
+      ],
+      "qualitative_criteria": ["最优解处过炉速度约 86-95cm/min，温区 8~9 温度贴近上限 265°C"]
+    },
+    {
+      "question": 4,
+      "task": "在问题 3 基础上加入炉温曲线对称性目标的双目标优化",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "兼顾对称性后的阴影面积",
+          "unit": "degC*s",
+          "values": {"A070": 449.17, "A195": 483.5765, "A212": 409.065},
+          "reference_band": {"low": 409.0, "high": 484.0},
+          "better_direction": "lower",
+          "confidence": "medium",
+          "source_note": "A070 449.17、A195 483.58、A212 409.07",
+          "notes": "对称性指标各家定义不同（范数/角度差/均方差），不做跨篇对称值检查；面积应不明显劣于问题 3"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值取自 2020 年国赛 A 题四篇优秀论文摘要文本层，非官方标准答案；问题 1 存在 3+1 离群格局按聚类值给参考，问题 3/4 为启发式优化以水平带评估。"
+}

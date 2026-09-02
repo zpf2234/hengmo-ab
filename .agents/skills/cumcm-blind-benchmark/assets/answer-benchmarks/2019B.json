@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "year": 2019,
+  "problem": "B",
+  "title": "“同心协力”策略研究（同心鼓）",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "B047", "file": "最终效果/高教杯优秀论文/（B047）同心鼓最佳协作策略的研究.pdf"},
+    {"id": "B057", "file": "最终效果/高教杯优秀论文/（B057）同心鼓“同心协力”策略探究.pdf"},
+    {"id": "B136", "file": "最终效果/高教杯优秀论文/（B136）齐心舞动“同心鼓”，齐力牵起“协力绳”.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "理想状态下团队最佳协作策略及该策略下的颠球高度",
+      "evaluation_mode": "strategy",
+      "checks": [
+        {
+          "quantity": "最佳策略下的稳定颠球高度",
+          "unit": "m",
+          "values": {"B047": 0.4116},
+          "reference_value": 0.42,
+          "tolerance": {"type": "relative", "value": 0.15},
+          "confidence": "low",
+          "source_note": "B047 摘要：同时发力 80N、时机 0.01s 时稳定颠球高度 0.4116m",
+          "notes": "颠球高度依赖所选发力参数，只要求略高于 0.4m 门槛且周期稳定"
+        }
+      ],
+      "qualitative_criteria": [
+        "发力方向沿绳指向鼓身切向对称，全员时机与力度一致",
+        "发力量级 80-90N（B047 用 80N，B057 用 90N），周期约 0.6-0.8s",
+        "颠球高度必须 >= 0.4m 且策略可周期性重复"
+      ]
+    },
+    {
+      "question": 2,
+      "task": "发力时机与力度存在误差时，给定 9 组工况下 0.1s 时刻鼓面倾角",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "工况 1（单人提前 0.1s 发力类）鼓面倾角",
+          "unit": "deg",
+          "values": {"B047": 0.1833, "B136": 0.2124},
+          "reference_value": 0.2,
+          "tolerance": {"type": "relative", "value": 0.3},
+          "confidence": "medium",
+          "source_note": "B047 摘要前 4 工况 0.1833/0.3338/0.1383/0.6420；B136 摘要 9 工况 0.2124/0.3885/0.1649/0.2270/0.4123/0.1749/0.2175/0.1359/0.3401",
+          "notes": "两源系统性偏差约 16%（时刻与转动惯量约定不同），组间相对大小模式一致"
+        },
+        {
+          "quantity": "工况 2 鼓面倾角",
+          "unit": "deg",
+          "values": {"B047": 0.3338, "B136": 0.3885},
+          "reference_value": 0.36,
+          "tolerance": {"type": "relative", "value": 0.3},
+          "confidence": "medium",
+          "source_note": "同上，工况 2 两源分别为 0.3338 与 0.3885"
+        }
+      ],
+      "qualitative_criteria": ["倾角量级为 0.1-0.7 度的小角度；力度误差工况的倾角大于同幅度时机误差工况的模式应与两源一致"]
+    },
+    {
+      "question": 3,
+      "task": "考虑鼓面倾斜后对问题 1 策略的调整",
+      "evaluation_mode": "strategy",
+      "qualitative_criteria": [
+        "调整应针对倾斜方向上的个别队员发力（力度或时机），其余保持基准策略",
+        "调整后倾角显著减小（B047 示例：1.99 度调整后 0.0528 度）"
+      ]
+    },
+    {
+      "question": 4,
+      "task": "球脱离方向倾斜时的队员调整策略及现实可行性分析",
+      "evaluation_mode": "strategy",
+      "qualitative_criteria": [
+        "给出恢复竖直弹跳的具体拉力分配（B057 示例：F1=129.3N、F2=115.5N、F6=99N、其余 100N）",
+        "结论包含现实操作难度与鲁棒性讨论（精确控制难，应优先避免倾斜发生）"
+      ]
+    }
+  ],
+  "provenance": "数值取自 2019 年国赛 B 题三篇优秀论文摘要文本层，非官方标准答案；本题为策略主导题，倾角检查采用宽容差并以组间模式一致性为主要判据。"
+}

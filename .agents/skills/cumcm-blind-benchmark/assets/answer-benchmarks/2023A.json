@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "year": 2023,
+  "problem": "A",
+  "title": "定日镜场的优化设计",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）；A092 摘要数值嵌于公式图片无法提取",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A092", "file": "最终效果/高教杯优秀论文/(A092)定日镜场的优化设计.pdf", "note": "摘要关键数值为嵌入图片，文本层缺失，仅方法参与交叉"},
+    {"id": "A127", "file": "最终效果/高教杯优秀论文/(A127)定日镜场的输出功率优化.pdf"},
+    {"id": "A165", "file": "最终效果/高教杯优秀论文/(A165)基于机理分析法的定日镜场优化设计模型.pdf"},
+    {"id": "A175", "file": "最终效果/高教杯优秀论文/(A175)定日镜场的优化设计模型.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "给定圆形定日镜场的年平均光学效率与输出热功率计算",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "年平均光学效率",
+          "unit": "1",
+          "values": {"A127": 0.6051, "A165": 0.4902, "A175": 0.53623},
+          "reference_value": 0.55,
+          "tolerance": {"type": "absolute", "value": 0.08},
+          "confidence": "low",
+          "source_note": "三源摘要：0.6051/0.4902/0.5362，散布大",
+          "notes": "阴影遮挡与截断效率的数值实现（栅格/蒙特卡洛精度）导致大散布；落在 0.47-0.63 内视为优秀论文水平"
+        },
+        {
+          "quantity": "单位镜面面积年平均输出热功率",
+          "unit": "kW/m^2",
+          "values": {"A127": 0.5888, "A165": 0.3827, "A175": 0.521508604},
+          "reference_value": 0.5,
+          "tolerance": {"type": "absolute", "value": 0.12},
+          "confidence": "low",
+          "source_note": "三源摘要：0.5888/0.3827/0.5215",
+          "notes": "年平均输出热功率对应为 36.99/24.04/32.76 MW"
+        }
+      ],
+      "qualitative_criteria": ["光学效率分解为余弦、阴影遮挡、截断、大气透射、镜面反射五项且逐项报告"]
+    },
+    {
+      "question": 2,
+      "task": "额定 60MW 下统一镜面尺寸与安装高度的镜场设计，使单位镜面面积年平均输出热功率最大",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "单位镜面面积年平均输出热功率",
+          "unit": "kW/m^2",
+          "values": {"A127": 0.5871, "A165": 0.4505},
+          "reference_band": {"low": 0.45, "high": 0.6},
+          "better_direction": "higher",
+          "confidence": "medium",
+          "source_note": "A127 摘要 0.5871（塔位 (0,-79)、5.5m 镜、高 2.75m、3385 面、60.12MW）；A165 摘要 0.4505（塔位 (0,-237)、5.47m 镜、43.73MW）",
+          "notes": "必须核验额定年平均热功率 >= 60MW 约束；A165 的 43.73MW 疑似未满足该约束"
+        }
+      ],
+      "qualitative_criteria": ["定日镜数量量级约 3000-3500 面、镜面尺寸靠近上限、排布呈同心圆/蜂窝环状"]
+    },
+    {
+      "question": 3,
+      "task": "镜面尺寸与安装高度可逐镜（或分区）不同时的镜场设计",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "单位镜面面积年平均输出热功率",
+          "unit": "kW/m^2",
+          "values": {"A127": 0.5307, "A165": 0.4556},
+          "reference_band": {"low": 0.45, "high": 0.6},
+          "better_direction": "higher",
+          "confidence": "medium",
+          "source_note": "A127 摘要 0.5307（61.86MW、2846 面、7 种安装高度）；A165 摘要 0.4556（44.25MW）",
+          "notes": "同一实现内问题 3 解空间包含问题 2，结果不应明显劣于问题 2（A165 满足 0.4556>0.4505，A127 的 0.5307<0.5871 说明其启发式欠优）——评估时以此自洽性为强判据"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值取自 2023 年国赛 A 题优秀论文摘要文本层，非官方标准答案；本题各源数值散布大，问题 1 用宽容差、问题 2/3 用水平带加约束与自洽性判据评估。"
+}

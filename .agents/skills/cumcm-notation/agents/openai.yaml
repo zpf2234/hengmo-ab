@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 符号说明"
+  short_description: "依据题目语义生成三列符号表，并统一全文符号、含义、索引与单位"
+  default_prompt: "Use $cumcm-notation to create the fourth-section notation table with only brief factual notes when needed."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,53 @@
+{
+  "profile_version": 1,
+  "visual_preset": "cumcm-classic-orthogonal",
+  "style_confirmation_required": false,
+  "canvas": {
+    "background": "#FFFFFF",
+    "show_grid_in_export": false
+  },
+  "typography": {
+    "cjk_font": "SimSun",
+    "math_font": "Cambria Math",
+    "normal_pt": 8.8,
+    "minimum_final_pt": 8.5
+  },
+  "palette": {
+    "text": "#111111",
+    "line": "#26344D",
+    "phase_frame": "#4D63D8",
+    "node_fill": "none",
+    "label_background": "transparent",
+    "line_continuity": "unmasked",
+    "label_placement": "beside_line"
+  },
+  "geometry": {
+    "process": "rectangle",
+    "decision": "diamond",
+    "input_output": "parallelogram",
+    "start_end": "stadium",
+    "connectors": "orthogonal",
+    "feedback": "solid_outer_route",
+    "phase_frame": "dashed"
+  },
+  "forbidden": [
+    "gradient",
+    "shadow",
+    "glow",
+    "decorative_icon",
+    "stage_badge",
+    "focus_card",
+    "colored_node_fill",
+    "grid_background"
+  ],
+  "layout_variants": [
+    "horizontal-mainline",
+    "horizontal-feedback",
+    "vertical-branching",
+    "layered-dependency",
+    "objective-constraint-fusion",
+    "phased-groups",
+    "hybrid-evolution",
+    "mechanism-assisted"
+  ]
+}

@@ -1,0 +1,7 @@
+matplotlib
+mcp
+numpy
+pdfplumber
+PyMuPDF
+pytest
+pywin32; platform_system == "Windows"

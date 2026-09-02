@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "year": 2018,
+  "problem": "B",
+  "title": "智能 RGV 的动态调度策略",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "B203", "file": "最终效果/高教杯优秀论文/（B203）基于+0-1+规划的单+RGV+动态调度模型.pdf"},
+    {"id": "B217", "file": "最终效果/高教杯优秀论文/（B217）基于多原则比较和蒙特卡洛模拟的+RGV+动态调度模型.pdf"},
+    {"id": "B225", "file": "最终效果/高教杯优秀论文/（B225）智能+RGV+的动态调度策略.pdf"},
+    {"id": "B334", "file": "最终效果/高教杯优秀论文/（B334）RGV+的动态调度优化问题.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "情况 1：单工序无故障，一班次 8 小时三组参数下最大成料数",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "第 1 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 382, "B217": 383, "B225": 382, "B334": 382},
+          "reference_value": 382,
+          "tolerance": {"type": "absolute", "value": 4},
+          "confidence": "high",
+          "source_note": "四源摘要：382/383/382/382"
+        },
+        {
+          "quantity": "第 2 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 359, "B217": 360, "B225": 359, "B334": 359},
+          "reference_value": 359,
+          "tolerance": {"type": "absolute", "value": 4},
+          "confidence": "high",
+          "source_note": "四源摘要：359/360/359/359"
+        },
+        {
+          "quantity": "第 3 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 392, "B217": 393, "B225": 392, "B334": 391},
+          "reference_value": 392,
+          "tolerance": {"type": "absolute", "value": 4},
+          "confidence": "high",
+          "source_note": "四源摘要：392/393/392/391"
+        }
+      ],
+      "qualitative_criteria": ["单工序最优调度呈 1→2→…→8 循环（B217 三种原则一致）"]
+    },
+    {
+      "question": 2,
+      "task": "情况 2：双工序无故障，刀具分配与调度联合优化的最大成料数",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "第 1 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 253, "B217": 253, "B225": 253, "B334": 253},
+          "reference_value": 253,
+          "tolerance": {"type": "absolute", "value": 4},
+          "confidence": "high",
+          "source_note": "四源摘要全部为 253，最优刀具分布一致为 1-2-1-2-1-2-1-2"
+        },
+        {
+          "quantity": "第 2 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 211, "B217": 212, "B225": 209, "B334": 210},
+          "reference_value": 210,
+          "tolerance": {"type": "absolute", "value": 5},
+          "confidence": "high",
+          "source_note": "四源摘要：211/212/209/210，最优刀具分布 2-1-2-1-2-1-2-1"
+        },
+        {
+          "quantity": "第 3 组参数成料数",
+          "unit": "件",
+          "values": {"B203": 243, "B217": 241, "B225": 236, "B334": 240},
+          "reference_value": 240,
+          "tolerance": {"type": "absolute", "value": 6},
+          "confidence": "high",
+          "source_note": "四源摘要：243/241/236/240，最优刀具分布近似 1-1/2-1-2-1-1-2 型"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "情况 3：1% 故障概率下的单/双工序调度（随机模拟）",
+      "evaluation_mode": "estimation",
+      "checks": [
+        {
+          "quantity": "单工序第 1 组故障情形成料数",
+          "unit": "件",
+          "values": {"B203": 376},
+          "reference_value": 376,
+          "tolerance": {"type": "absolute", "value": 15},
+          "confidence": "low",
+          "source_note": "B203 摘要 376（故障 3 次）；故障为随机模拟，B225 报告 20 组试验方差约 10-20",
+          "notes": "评估时应做多次随机重复并报均值与方差，落入 361-391 视为同水平"
+        },
+        {
+          "quantity": "双工序第 1 组故障情形成料数",
+          "unit": "件",
+          "values": {"B203": 239},
+          "reference_value": 239,
+          "tolerance": {"type": "absolute", "value": 12},
+          "confidence": "low",
+          "source_note": "B203 摘要 239；B217 报告故障使双工序效率至多下降 1.875 件/h"
+        }
+      ],
+      "qualitative_criteria": ["故障情形产量应低于同组无故障产量，且降幅与 1% 故障率和 10-20 分钟修复时长量级一致"]
+    }
+  ],
+  "provenance": "数值取自 2018 年国赛 B 题四篇优秀论文摘要文本层，非官方标准答案；无故障产量四源高度一致构成强基准，故障产量含随机性以宽容差记录。"
+}

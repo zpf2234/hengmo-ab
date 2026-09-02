@@ -1,0 +1,147 @@
+% CUMCM 单文件总稿模板：所有论文正文、参考文献与纸面附录均写在本文件中。
+% 禁止用 \input、\include 或 subfiles 拆分章节；图片与附件可保持为独立资产。
+\PassOptionsToPackage{quiet}{xeCJK}
+\documentclass[withoutpreface,bwprint]{format}
+\usepackage{ctex}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{siunitx}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{url}
+
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\title{论文标题}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+% 先交代共同对象与主线，再逐问写“目标/关键关系—方法与求解动作—定量答案—必要检验”。
+% 同一局限或边界不在摘要、问尾、验证章和汇总表重复说明。
+% 核心问允许更长，过渡问压缩；允许自然使用“我们”，最终实编不超过一页。
+% 每问统一使用 abstractquestion 环境；只用 \keymethod、\keyresult 强调核心方法和最终结果。
+% \begin{abstractquestion}{一}
+% 我们采用\keymethod{核心方法}完成……，得到\keyresult{核心结果}，并由……验证。
+% \end{abstractquestion}
+\keywords{关键词一\quad 关键词二\quad 关键词三}
+\label{abstract:end}
+\end{abstract}
+
+\label{body:start}
+\section{问题重述}
+\label{sec:restatement}
+
+\subsection{问题背景}
+% 按“对象与直接场景—现实判据或任务触发条件”紧凑交代，不写研究意义和文献综述。
+
+\subsection{问题提出}
+% 先概括共同数据与条件，再按题面顺序用段内加粗“问题一：”“问题二：”写输入、限制和输出，不设三级标题。
+
+\section{问题分析}
+\label{sec:analysis}
+% 每问用一个二级标题，从本题对象、约束、矛盾、数据异常或关键转化自然起句。
+% 特征、转化、必要路线和输出衔接是按需组合的职责，不是固定顺序或固定四段；各问叙事形状随问题结构变化。
+% 自行判断核心问、支撑问和过渡问，不平均分配篇幅，也不设固定字数；完整推导、参数和结果留在第五章。
+
+\section{模型假设}
+\label{sec:assumptions}
+\begin{enumerate}[label=\arabic*., leftmargin=2.5em, labelsep=0.6em]
+  \item 假设……
+\end{enumerate}
+
+\section{符号说明}
+\label{sec:notation}
+\begin{table}[htbp]
+  \centering
+  \caption{主要符号及其含义}
+  \label{tab:symbols}
+  \begin{tabularx}{\textwidth}{C L C}
+    \toprule
+    \textbf{符号} & \textbf{含义} & \textbf{单位} \\
+    \midrule
+    % 按“对象—角色—索引—单位”从当前题目的模型语义生成，不照搬示例符号。
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{模型的建立与求解}
+\label{sec:model-solution}
+% 问题层标题默认简写为“问题一”“问题二”；短任务名确有展示价值时可写“问题一：临界角求解”。
+% 问题标题后可直接进入正文；只在路线确实复杂时用一两句交代，不预制“输入—转化—输出”路线段。
+% 审计、原稿、重构、统一口径、计数闭合、门禁、证据边界和模型链只写入审查文件，不得进入论文正文。
+% 示例骨架（全部为注释，使用时改成当前题目的真实内容）：
+% \subsection{问题一}
+% \subsubsection{受力分析}  % 仅在确有独立内容时设置
+% \subsubsection{数值求解}
+% 模型建立：对象/变量/单位 → 假设进入位置 → 机理或结构关系 → 目标、约束、边界与参数来源。
+% 具体求解：变换/离散/初始化 → 参数求取或状态更新 → 约束处理 → 停止条件、精度与输出。
+% 本问收束：关键结果 → 现实解释 → 独立验证 → 风险或适用边界 → 直接结论及下一问输入。
+% 上述是职责闭环，不是固定标题清单；内容能够连续成文时不得机械拆成同名三级标题。
+% 小标题一般 4--10 个汉字，只展示一个中心；不把口径、审计、闭环、证据链、门禁、作答映射写进标题。
+% 正文组织可从下列职责链选择最匹配者：
+% 机理问：几何/物理关系—基本方程—递推或联立—离散求解—状态演化—精度/灵敏度。
+% 临界问：限定检查范围—边界对象—判定准则—首次临界搜索—临界前后对比。
+% 其他题型可按实验推断、序贯决策、空间布设或不确定性反馈链展开；只沿题面新增条件升级模型。
+% 边界优化问：极限讨论—决策变量—目标与约束来源—完整模型—粗细搜索—邻域/反例复核。
+% 分段过程问：拆分子任务—共享机理—消元/降维—分段状态—递推求解—异常或突变解释。
+% 能力上限问：继承状态映射—最大化目标与硬约束—简单搜索或智能算法 Step—活跃约束—独立核验。
+% 每问通常设置 0--3 个简短三级标题，不把职责机械拆成同名小节，也不追求各问标题对称。
+% 结果解释、独立验证/风险边界和最终作答嵌入对应问题，不能把全部验证推迟到全文末尾。
+% 只有题目确实需要跨问检验，且存在两类以上实质性检验时，才设置独立“结果检验”章。
+% 算术核对、口径统一、证据边界和模型链总结留在审查文件，不单独成章。
+% 全文采用参赛队员向评委讲述实际求解的视角。
+
+% 有两类以上必要的跨问检验时设置独立一级章；否则合并到相应问题的检验小节。
+% \section{结果检验}
+% \label{sec:validation}
+% 直接报告复算、对照、扰动或边界情形及其对答案的影响，不写章节职责说明。
+
+\section{模型评价、改进与推广}
+\label{sec:evaluation}
+% 优点：结构或方法 → 已展示证据 → 在什么条件下带来何种可靠性。
+% 局限：触发条件 → 受影响的结果 → 当前证据覆盖范围。
+% 改进：对应局限 → 所需新增信息或处理 → 可验证的预期变化。
+% 推广：保持不变的机制 → 必须重估的参数、假设或约束。
+% 不重复摘要或逐问答案，不写空泛自夸和未实现方法清单。
+
+\label{ai-statement:start}
+\section*{AI工具使用声明}
+% 按实际情况二选一，保留官方原文，不自行改写：
+% 本参赛队在竞赛过程中未使用任何AI工具。
+% 本参赛队在竞赛过程中使用了AI工具，主要用于〖简要用途，如语言润色、代码调试等〗，详细使用情况见支撑材料。
+
+\label{references:start}
+\begin{thebibliography}{99}
+  % 只列实际引用的学术与数据来源；AI 工具不列入参考文献。
+\end{thebibliography}
+
+\clearpage
+\label{appendix:start}
+\appendix
+\renewcommand{\thesection}{附录\arabic{section}}
+\renewcommand{\thesubsection}{附录\arabic{section}.\arabic{subsection}}
+\section{支撑材料清单}
+\label{app:support-index}
+% 列出附件中的完整程序、环境、运行方式和对应问题。
+
+\section{完整程序代码}
+\label{app:source-code}
+% 按问题或功能模块收录实际使用的全部完整、可运行程序；不得只给代码索引或用省略号代替。
+% 代码统一使用 listings：带细边框、行号、语法高亮、自动换行和可搜索文本。
+% \lstinputlisting[language=Python,caption={问题一完整求解程序}]{../附件/problem1.py}
+
+\section{补充材料}
+\label{app:supplement}
+% 放置正文不宜展开但核查结论所需的补充推导、长表、中间结果或诊断；附件中同步保留可运行源文件。
+
+\end{document}

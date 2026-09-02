@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "year": 2019,
+  "problem": "A",
+  "title": "高压油管的压力控制",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "A023", "file": "最终效果/高教杯优秀论文/（A023）基于数值模拟的高压油管压力控制模型.pdf"},
+    {"id": "A190", "file": "最终效果/高教杯优秀论文/（A190）高压油管的压强控制.pdf"},
+    {"id": "A240", "file": "最终效果/高教杯优秀论文/（A240）高压油管压力波动的稳定控制.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "维持管内压力稳定 100MPa 的单向阀单次开启时长；以及升压至 150MPa 的调整策略",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "压力稳定 100MPa 时单向阀单次开启时长",
+          "unit": "ms",
+          "values": {"A023": 0.288, "A190": 0.29, "A240": 0.2875},
+          "reference_value": 0.288,
+          "tolerance": {"type": "relative", "value": 0.02},
+          "confidence": "high",
+          "source_note": "三源摘要：0.288/0.29/0.2875，散布约 0.9%"
+        },
+        {
+          "quantity": "稳定在 150MPa 后的单向阀开启时长",
+          "unit": "ms",
+          "values": {"A023": 0.752, "A190": 0.72, "A240": 0.765},
+          "reference_value": 0.75,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "high",
+          "source_note": "三源摘要：0.752/0.72/0.765；2s/5s/10s 过渡策略各家不同但稳态值一致",
+          "notes": "过渡段策略（如 2s 内 0.9ms 级开启）不设跨篇检查，只检稳态值"
+        }
+      ]
+    },
+    {
+      "question": 2,
+      "task": "凸轮驱动柱塞泵与针阀喷油嘴情形下，使压力稳定 100MPa 的凸轮角速度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "凸轮转动角速度",
+          "unit": "rad/s",
+          "values": {"A023": 27.5, "A190": 27.195, "A240": 27.3},
+          "reference_value": 27.3,
+          "tolerance": {"type": "relative", "value": 0.03},
+          "confidence": "high",
+          "source_note": "三源摘要：27.5 / 27.195 / 0.0273rad/ms=27.3，散布约 1.1%"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "双喷油嘴时的供油/喷油策略，以及增加减压阀后的控制方案",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "两个喷油嘴的最佳错峰工作间隔",
+          "unit": "ms",
+          "values": {"A023": 50.0, "A190": 50.0, "A240": 49.1},
+          "reference_value": 50.0,
+          "tolerance": {"type": "absolute", "value": 2.0},
+          "confidence": "high",
+          "source_note": "A023 摘要 50ms，A190 摘要为相差半个周期（喷油周期 100ms 即 50ms），A240 摘要 49.1ms"
+        },
+        {
+          "quantity": "泄压式减压阀最优开启阈值压力",
+          "unit": "MPa",
+          "values": {"A023": 100.0, "A240": 102.25},
+          "reference_value": 101.0,
+          "tolerance": {"type": "absolute", "value": 3.0},
+          "confidence": "medium",
+          "source_note": "A023 摘要阈值 100MPa，A240 摘要 102.25MPa"
+        }
+      ],
+      "qualitative_criteria": [
+        "凸轮角速度存在多个可行最优解（A023 得 55rad/s，A190 得 483.332rad/s，均被评为优秀），不设唯一数值检查",
+        "阈值触发式减压阀稳定性优于定周期开启式（A190：波动 0.1036MPa 对 2.678MPa）"
+      ]
+    }
+  ],
+  "provenance": "数值取自 2019 年国赛 A 题三篇优秀论文摘要文本层，非官方标准答案；单向阀开启时长与凸轮角速度三源高度一致构成强基准，双喷嘴角速度为多解量仅记录定性结论。"
+}

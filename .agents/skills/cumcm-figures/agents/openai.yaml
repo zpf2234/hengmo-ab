@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 数据图形"
+  short_description: "按证据职责、变量维度和版面密度规划、生成并审查数据图"
+  default_prompt: "Use $cumcm-figures to plan and audit evidence-bearing CUMCM data figures."
+
+policy:
+  allow_implicit_invocation: true

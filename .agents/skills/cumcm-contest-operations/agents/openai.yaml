@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 限时作战"
+  short_description: "编排国赛72小时关键路径、证据检查点、风险止损与可信降级路线"
+  default_prompt: "Use $cumcm-contest-operations to organize a 72-hour CUMCM critical path with evidence checkpoints and honest fallback routes."
+
+policy:
+  allow_implicit_invocation: true

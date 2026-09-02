@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 结构图与流程图"
+  short_description: "设计克制、准确、易读、可编辑的专业结构图、机理图与流程图"
+  default_prompt: "Use $cumcm-diagrams to design and audit CUMCM diagrams, using the fixed classical orthogonal style for flowcharts."
+
+policy:
+  allow_implicit_invocation: true

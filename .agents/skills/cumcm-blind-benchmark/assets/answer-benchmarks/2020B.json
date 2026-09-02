@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "year": 2020,
+  "problem": "B",
+  "title": "穿越沙漠",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "B078", "file": "最终效果/高教杯优秀论文/（B078）“穿越沙漠”游戏最佳策略模型的研究与构建.pdf"},
+    {"id": "B108", "file": "最终效果/高教杯优秀论文/（B108）基于动态规划、统计分析、静态博弈的穿越沙漠游戏策略设计.pdf"},
+    {"id": "B125", "file": "最终效果/高教杯优秀论文/（B125）“穿越沙漠”游戏下玩家的最优策略模型.pdf"},
+    {"id": "B175", "file": "最终效果/高教杯优秀论文/（B175）穿越沙漠游戏中的玩家行为决策问题.pdf"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "天气全程已知的单人最优策略：第一关与第二关的终点剩余资金",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "第一关最优剩余资金",
+          "unit": "元",
+          "values": {"B078": 10470, "B108": 10470, "B125": 10470, "B175": 10470},
+          "reference_value": 10470,
+          "tolerance": {"type": "absolute", "value": 60},
+          "confidence": "high",
+          "source_note": "四源摘要全部为 10470 元（B108 注明用时 24 天），动态规划全局最优",
+          "notes": "确定性全局最优，正确实现应精确命中 10470"
+        },
+        {
+          "quantity": "第二关最优剩余资金",
+          "unit": "元",
+          "values": {"B078": 12730, "B108": 12730, "B125": 12730, "B175": 12720},
+          "reference_value": 12730,
+          "tolerance": {"type": "absolute", "value": 60},
+          "confidence": "high",
+          "source_note": "B078/B108/B125 为 12730（B108 注明用时 30 天），B175 为 12720",
+          "notes": "12730 为多数一致值"
+        }
+      ]
+    },
+    {
+      "question": 2,
+      "task": "天气未知（仅知当天）时第三、四关的决策策略与期望收益",
+      "evaluation_mode": "estimation",
+      "checks": [
+        {
+          "quantity": "第三关最优策略过关得分期望",
+          "unit": "元",
+          "values": {"B108": 9350},
+          "reference_value": 9350,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "medium",
+          "source_note": "B108 摘要：严格计算与随机模拟均为 9350（1024 种天气穷举）",
+          "notes": "策略空间小可穷举，该期望有近似唯一性"
+        },
+        {
+          "quantity": "第四关代表性剩余资金",
+          "unit": "元",
+          "values": {"B078": 10065},
+          "reference_value": 10065,
+          "tolerance": {"type": "relative", "value": 0.2},
+          "confidence": "low",
+          "source_note": "B078 摘要 10065 元（起点→村庄→矿山→终点）；B108 仅给失败概率 <2.5% 的策略性结论",
+          "notes": "第四关口径不一（单次实现/期望），仅作量级参考"
+        }
+      ],
+      "qualitative_criteria": [
+        "第三关最优策略为直奔终点（前三天到达）且起点只买最少必需物资，两源一致",
+        "第四关策略为买足物资、经村庄及时补给，失败概率控制在个位数百分比"
+      ]
+    },
+    {
+      "question": 3,
+      "task": "多人博弈情形（第五、六关）的策略设计",
+      "evaluation_mode": "strategy",
+      "qualitative_criteria": [
+        "第五关均衡解为双方均采用尽快（约 3 天）到达终点的策略并在起点购买最少生存物资（B108）",
+        "分析框架为静态博弈（支付矩阵/纯策略与混合策略均衡），并讨论恶性竞争导致双输、协同/错峰更优（B175）"
+      ]
+    }
+  ],
+  "provenance": "数值取自 2020 年国赛 B 题四篇优秀论文摘要文本层，非官方标准答案；第一、二关为确定性动态规划最优值且四源完全一致，构成本库中最强的数值基准之一。"
+}

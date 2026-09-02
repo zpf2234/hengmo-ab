@@ -1,0 +1,6 @@
+interface:
+  display_name: "CUMCM 优秀论文总控"
+  short_description: "半自动统筹国赛求解、两次确认、证据成文、审查与最终交付"
+  default_prompt: "Use $cumcm to solve this CUMCM problem, pause for my method-and-result approval, then pause again for outline-and-page approval before drafting."
+policy:
+  allow_implicit_invocation: true

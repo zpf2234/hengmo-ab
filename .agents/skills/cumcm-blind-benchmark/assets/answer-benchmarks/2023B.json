@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "year": 2023,
+  "problem": "B",
+  "title": "多波束测线问题",
+  "extraction": {
+    "mode": "text_layer",
+    "pages_used": "各源 PDF 摘要页（前 3 页文本层）；B311/B477 摘要数值部分嵌于公式图片缺失",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "B226", "file": "最终效果/高教杯优秀论文/(B226)多波束测线布设.pdf"},
+    {"id": "B311", "file": "最终效果/高教杯优秀论文/(B311)基于主要目标法的测线设计问题.pdf", "note": "摘要公式与数值为图片，文本层缺失"},
+    {"id": "B477", "file": "最终效果/高教杯优秀论文/(B477)多波束测深合理探测方案的设计及效果分析.pdf", "note": "问题 4 数值为图片字符，文本层缺失"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "测线垂直于坡面竖直平面时覆盖宽度与相邻条带重叠率模型（result1.xlsx）",
+      "evaluation_mode": "numeric",
+      "qualitative_criteria": [
+        "解析几何模型：水深随测线距中心距离线性变化 D = D0 - x·tanα，覆盖宽度由开角 120°、坡度 1.5° 经正弦定理给出",
+        "结果表应发现最外侧（浅水端）测线出现重叠率 <10% 甚至漏测（B477 摘要明确指出最浅两条测线漏测）",
+        "该问为确定性几何计算，评估者应用独立实现对 result1.xlsx 全表复算"
+      ]
+    },
+    {
+      "question": 2,
+      "task": "测线方向与坡面法向投影成任意夹角时的覆盖宽度模型（result2.xlsx）",
+      "evaluation_mode": "numeric",
+      "qualitative_criteria": [
+        "三维模型：沿测线方向的有效坡度为 tanθ' = tanα·|cosβ|（β 为测线与坡向夹角），覆盖宽度随之变化",
+        "该问为确定性几何计算，评估者应用独立实现对 result2.xlsx 全表复算",
+        "各源摘要均未给出可交叉的具体数值，数值核验依赖独立实现"
+      ]
+    },
+    {
+      "question": 3,
+      "task": "矩形海域（2 海里 × 4 海里）满足全覆盖与 10%-20% 重叠率的最短测线设计",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "最优测线条数",
+          "unit": "条",
+          "values": {"B226": 34, "B477": 34},
+          "reference_value": 34,
+          "tolerance": {"type": "absolute", "value": 2},
+          "confidence": "high",
+          "source_note": "B226 与 B477 摘要一致：平行等深线方向布设 34 条",
+          "notes": "测线方向必须平行于等深线（两源均给出证明或论证）"
+        },
+        {
+          "quantity": "测线总长度",
+          "unit": "m",
+          "values": {"B226": 125936},
+          "reference_value": 125936,
+          "tolerance": {"type": "relative", "value": 0.03},
+          "confidence": "medium",
+          "source_note": "B226 摘要 125936m；与 34 条 × 3704m（2 海里）自洽",
+          "notes": "34 条平行线每条长约 2 海里，总长约 126km"
+        }
+      ]
+    },
+    {
+      "question": 4,
+      "task": "利用单波束历史数据为复杂海域设计多波束测线（漏测与超重叠指标）",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "测线总长度",
+          "unit": "海里",
+          "values": {"B226": 622},
+          "reference_value": 622,
+          "tolerance": {"type": "relative", "value": 0.15},
+          "confidence": "low",
+          "source_note": "B226 摘要：总长 622 海里、漏测海区占比 3.48%、重叠率超 20% 部分总长 30 海里",
+          "notes": "分区拟合与算法差异导致各家总长不同，量级参考"
+        }
+      ],
+      "qualitative_criteria": [
+        "漏测海区占总待测面积百分比控制在个位数（B226 为 3.48%）",
+        "方案流程为分区（按等深线/拟合坡面）后逐区套用问题 3 模型"
+      ]
+    }
+  ],
+  "provenance": "数值取自 2023 年国赛 B 题优秀论文摘要文本层，非官方标准答案；问题 1/2 为确定性几何计算需独立实现复算，问题 3 的 34 条测线为两源一致强基准。"
+}

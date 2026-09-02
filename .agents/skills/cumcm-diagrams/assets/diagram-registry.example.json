@@ -1,0 +1,55 @@
+{
+  "schema_version": 3,
+  "edge_schema_version": 1,
+  "diagrams": [
+    {
+      "id": "fig-model-flow",
+      "role": "flowchart",
+      "purpose": "说明参数更新、判停与回退之间的真实计算关系",
+      "claim_ids": ["C-Q2-01"],
+      "draft_dependency": {
+        "source_section_anchor": "sec:q2-search-and-stop",
+        "section_draft_stable": true,
+        "symbols_formulas_checked": true,
+        "rendered_after_draft": true
+      },
+      "renderer_choice": {
+        "tikz_considered": true,
+        "selected": "tikz",
+        "fallback_reason": "not-applicable"
+      },
+      "style_family": "tikz",
+      "source": "论文/figures/model-flow.tex",
+      "vector_output": "论文/figures/model-flow.pdf",
+      "layout": "论文/figures/model-flow.layout.json",
+      "insert_width_mm": 120,
+      "final_min_font_pt": 8.5,
+      "flowchart_profile": {
+        "visual_preset": "cumcm-classic-orthogonal",
+        "layout_variant": "horizontal-feedback",
+        "style_confirmation_required": false,
+        "semantic_innovation": "根据本题真实判停与回退关系组织主链，不套教科书算法模板"
+      },
+      "generation": {
+        "mode": "mcp",
+        "renderer": "paper-tikz",
+        "tool": "compile_tikz",
+        "health_pass": true,
+        "spec_path": "审查/diagram-specs/model-flow.json",
+        "provenance_manifest": "审查/provenance/model-flow.json"
+      },
+      "vector_audit": {
+        "true_vector": true,
+        "aspect_ratio_distortion": 0.0
+      },
+      "visual_review": {
+        "actual_size_render": "审查/diagram-renders/model-flow-actual.png",
+        "full_page_render": "审查/diagram-renders/model-flow-page.png",
+        "thumbnail_render": "审查/diagram-renders/model-flow-thumb.png",
+        "grayscale_render": "审查/diagram-renders/model-flow-gray.png",
+        "publication_ready": true,
+        "ocr_only_review": false
+      }
+    }
+  ]
+}

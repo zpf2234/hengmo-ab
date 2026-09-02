@@ -1,0 +1,7 @@
+interface:
+  display_name: "CUMCM 赛题选择"
+  short_description: "用同口径最小试算、验证能力与风险止损冻结国赛选题决策"
+  default_prompt: "Use $cumcm-problem-selection to compare candidate CUMCM problems with equal-budget pilot runs and freeze an auditable selection."
+
+policy:
+  allow_implicit_invocation: true

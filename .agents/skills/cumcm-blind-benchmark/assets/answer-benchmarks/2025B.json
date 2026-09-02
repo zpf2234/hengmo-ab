@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "year": 2025,
+  "problem": "B",
+  "title": "红外干涉法测量外延层厚度",
+  "extraction": {
+    "mode": "visual_read",
+    "pages_used": "扫描版 PDF 第 1 页摘要渲染图（审查/答案基准提取/2025B_p1.png）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "GJ2025B", "file": "最终效果/高教杯优秀论文/2025高教社杯全国大学生数学建模竞赛B题优秀论文.pdf", "note": "唯一来源且为扫描版，数值由摘要页视觉读取"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "建立外延层厚度与反射光谱干涉条纹的物理模型并给出直接计算公式",
+      "evaluation_mode": "design_open",
+      "qualitative_criteria": [
+        "模型基于双光束干涉与折射率物理（该源用碳化硅/硅先验折射率物理模型与 Drude 折射率模型）",
+        "给出厚度 d 与相邻波谷（峰）周期/波数差的显式计算公式",
+        "考虑入射角与折射率的光程修正"
+      ]
+    },
+    {
+      "question": 2,
+      "task": "由附件 1、2（碳化硅晶片）反射率光谱计算外延层厚度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "附件 1、2 碳化硅外延层厚度（直接计算法）",
+          "unit": "um",
+          "values": {"GJ2025B": 7.544},
+          "reference_value": 7.544,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "medium",
+          "source_note": "摘要：周期波谷直接计算与牛顿迭代反演均得 7.544μm，依赖厚度参数曲线迭代另得 7.295μm，作者以 7.544μm 为直接计算值",
+          "notes": "同篇三法互证（7.295-7.544μm），单源但方法交叉一致"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "由附件 3、4（硅晶片）反射率光谱建立模型并计算外延层厚度，分析多光束效应",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "附件 3、4 硅外延层厚度",
+          "unit": "um",
+          "values": {"GJ2025B": 3.432},
+          "reference_value": 3.432,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "medium",
+          "source_note": "摘要：直接计算 3.453μm 与牛顿迭代 3.414μm，最终取 3.432μm 作为附件 3、4 厚度结果",
+          "notes": "须先判断多光束干涉效应显著性（该源用判别指标 G 与机器学习检验，认为附件 3、4 多光束效应较强）"
+        }
+      ]
+    },
+    {
+      "question": 4,
+      "task": "评估多光束干涉对附件 1、2 结果的影响并给出修正后厚度",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "修正模型下附件 1、2 最可信厚度",
+          "unit": "um",
+          "values": {"GJ2025B": 7.455},
+          "reference_value": 7.455,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "low",
+          "source_note": "摘要：修正多光束效应后以 7.455μm 为最终最可信厚度值，并判断附件 1、2 中多光束干涉效应较弱",
+          "notes": "修正幅度约 1.2%，方向性结论（附件 1、2 多光束效应弱、修正量小）是主要判据"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值由 2025 年国赛 B 题优秀论文（扫描版）摘要页视觉读取，单一来源且非官方标准答案；厚度条目依赖同篇多方法互证给 medium/low，评估时应优先复核干涉级次与折射率取值。"
+}

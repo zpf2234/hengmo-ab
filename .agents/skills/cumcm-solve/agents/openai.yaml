@@ -1,0 +1,6 @@
+interface:
+  display_name: "CUMCM 证据求解"
+  short_description: "完成可复现求解和验证，先提交方法结果供用户确认再交接论文"
+  default_prompt: "Use $cumcm-solve to build and validate the answer package, then stop and present the methods and results for my approval before any paper drafting."
+policy:
+  allow_implicit_invocation: true

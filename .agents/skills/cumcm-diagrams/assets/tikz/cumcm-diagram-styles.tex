@@ -1,0 +1,86 @@
+% Shared TikZ styles for CUMCM diagrams. Compile with XeLaTeX.
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,angles,quotes}
+
+\definecolor{cumcmInk}{HTML}{202124}
+\definecolor{cumcmLine}{HTML}{3F454B}
+\definecolor{cumcmGray}{HTML}{7A828A}
+\definecolor{cumcmBlue}{HTML}{355C7D}
+\definecolor{cumcmRed}{HTML}{B44C43}
+
+\tikzset{
+  cumcm node/.style={
+    draw=cumcmLine,
+    line width=.75pt,
+    fill=none,
+    text=cumcmInk,
+    font=\small,
+    align=center,
+    inner xsep=6pt,
+    inner ysep=4pt,
+    minimum height=8mm
+  },
+  cumcm process/.style={cumcm node,rectangle,text width=30mm},
+  cumcm process compact/.style={cumcm node,rectangle,text width=24mm},
+  cumcm process wide/.style={cumcm node,rectangle,text width=40mm},
+  cumcm decision/.style={
+    cumcm node,
+    diamond,
+    aspect=2.2,
+    text width=23mm,
+    inner xsep=2pt,
+    inner ysep=1.5pt
+  },
+  cumcm input output/.style={
+    cumcm node,
+    trapezium,
+    trapezium left angle=70,
+    trapezium right angle=110,
+    text width=28mm
+  },
+  cumcm startstop/.style={cumcm node,rectangle,rounded corners=4mm,text width=22mm,minimum height=7mm},
+  cumcm group/.style={
+    draw=cumcmBlue,
+    densely dashed,
+    line width=.6pt,
+    fill=none,
+    inner sep=6pt
+  },
+  cumcm phase title/.style={
+    text=cumcmBlue,
+    font=\footnotesize,
+    fill=none,
+    draw=none,
+    anchor=west,
+    inner sep=1pt
+  },
+  cumcm flow/.style={
+    -{Stealth[length=2.2mm,width=1.45mm]},
+    draw=cumcmLine,
+    line width=.8pt
+  },
+  cumcm relation/.style={-{Stealth[length=2.1mm,width=1.4mm]},draw=cumcmLine,line width=.75pt},
+  cumcm feedback/.style={cumcm flow,rounded corners=2pt},
+  cumcm helper/.style={draw=cumcmGray,line width=.5pt,densely dashed},
+  cumcm object/.style={draw=cumcmLine,line width=.8pt,fill=none},
+  cumcm trajectory/.style={
+    -{Stealth[length=2mm,width=1.3mm]},
+    draw=cumcmLine,
+    line width=.9pt
+  },
+  cumcm criterion/.style={draw=cumcmBlue,line width=1pt},
+  cumcm alert/.style={draw=cumcmRed,line width=1pt},
+  cumcm label/.style={
+    text=cumcmInk,
+    font=\small,
+    fill=none,
+    draw=none,
+    inner sep=1.5pt
+  },
+  cumcm branch label/.style={
+    text=cumcmInk,
+    font=\footnotesize,
+    fill=none,
+    draw=none,
+    inner sep=1.2pt
+  }
+}

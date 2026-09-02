@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# LaTeX 中间文件
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# 本地赛题与参赛产物
+/题目/
+/数据/
+/求解/
+/论文/
+/附件/
+/审查/
+/最终效果/
+/例题/
+/模拟/
+/output/
+/tmp/
+/.cumcm_state.json
+/.claude/
+
+# 绘图模块的可再生成产物
+/figure_mcp/*_outputs/
+/figure_mcp/cron_render_outputs/
+/figure_mcp/mixed_demo_outputs/
+/figure_mcp/reference_outputs/
+/figure_mcp/comparison_boards/
+/figure_mcp/pixel_comparison/
+
+# 临时目录与本地配置
+/_*/
+*.local.json
+nul

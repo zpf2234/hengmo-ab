@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "year": 2025,
+  "problem": "A",
+  "title": "多情形下无人机烟幕遮蔽策略的建模与优化",
+  "extraction": {
+    "mode": "visual_read",
+    "pages_used": "扫描版 PDF 第 1 页摘要渲染图（审查/答案基准提取/2025A_p1.png）",
+    "extracted_at": "2026-08-13"
+  },
+  "sources": [
+    {"id": "GJ2025A", "file": "最终效果/高教杯优秀论文/2025高教社杯全国大学生数学建模竞赛A题优秀论文.pdf", "note": "唯一来源且为扫描版，数值由摘要页视觉读取"}
+  ],
+  "questions": [
+    {
+      "question": 1,
+      "task": "给定投放策略下单枚烟幕弹对导弹 M1 的有效遮蔽时长",
+      "evaluation_mode": "numeric",
+      "checks": [
+        {
+          "quantity": "有效遮蔽时长",
+          "unit": "s",
+          "values": {"GJ2025A": 1.391643},
+          "reference_value": 1.3916,
+          "tolerance": {"type": "relative", "value": 0.05},
+          "confidence": "medium",
+          "source_note": "摘要：二分查找法求区间求并得 1.391643s；圆柱体上下底面圆周 300 点判据、布尔函数判断遮挡",
+          "notes": "确定性运动学计算，答案依赖遮蔽判定几何（视线与云团相交判据）与采样密度；单源但为确定性计算"
+        }
+      ]
+    },
+    {
+      "question": 2,
+      "task": "FY1 单机单弹干扰 M1 的投放策略优化（航向、速度、投放与起爆时刻）",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "最优有效遮蔽时长",
+          "unit": "s",
+          "values": {"GJ2025A": 4.5873},
+          "reference_value": 4.5873,
+          "tolerance": {"type": "relative", "value": 0.08},
+          "confidence": "medium",
+          "source_note": "摘要：多起点变步长搜索得 136.3663m/s、5.168° 匀速飞行，受领任务 0.8977s 后投放、间隔 0.0497s 后起爆，遮蔽 4.5873s；粒子群独立复核相对差 0.01%",
+          "notes": "该源用两种独立算法互证，可信度高于一般单源"
+        }
+      ]
+    },
+    {
+      "question": 3,
+      "task": "FY1 投放三枚烟幕弹干扰 M1 的时序规划",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "三弹最大有效遮蔽时长",
+          "unit": "s",
+          "values": {"GJ2025A": 6.93586},
+          "reference_value": 6.93586,
+          "tolerance": {"type": "relative", "value": 0.1},
+          "confidence": "low",
+          "source_note": "摘要：差分进化算法得 6.93586s（result1.xlsx）",
+          "notes": "高维非凸优化，启发式水平带；明显更高的答案需附可行性验证"
+        }
+      ]
+    },
+    {
+      "question": 4,
+      "task": "FY1、FY2、FY3 各投一弹协同干扰 M1",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "三机协同最大有效遮蔽时长",
+          "unit": "s",
+          "values": {"GJ2025A": 11.125936},
+          "reference_value": 11.125936,
+          "tolerance": {"type": "relative", "value": 0.1},
+          "confidence": "low",
+          "source_note": "摘要：预锁定拦截点协同优化 + 12 维决策空间降维 + 局部网格精化得 11.125936s（result2.xlsx）；差分进化独立验证得 11.645260s，两者接近",
+          "notes": "同篇两算法差约 4.7%，反映该问的启发式波动幅度"
+        }
+      ]
+    },
+    {
+      "question": 5,
+      "task": "5 架无人机多弹干扰 M1、M2、M3 的总体遮蔽策略",
+      "evaluation_mode": "optimization",
+      "checks": [
+        {
+          "quantity": "总最大有效遮蔽时长",
+          "unit": "s",
+          "values": {"GJ2025A": 21.077},
+          "reference_value": 21.077,
+          "tolerance": {"type": "relative", "value": 0.12},
+          "confidence": "low",
+          "source_note": "摘要：分层次优化（先任务分配再逐导弹求解 M1/M2/M3 最长遮蔽区间并交换微调）得 21.0770s（result3.xlsx）",
+          "notes": "任务分配 + 高维优化，各实现差异可较大，水平带参考"
+        }
+      ]
+    }
+  ],
+  "provenance": "数值由 2025 年国赛 A 题优秀论文（扫描版）摘要页视觉读取，单一来源且非官方标准答案；问题 1/2 为确定性或双算法互证条目给 medium，其余启发式高维优化条目给 low 并以水平带评估。"
+}

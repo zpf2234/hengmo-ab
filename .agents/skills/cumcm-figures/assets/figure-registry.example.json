@@ -1,0 +1,110 @@
+{
+  "schema_version": 4,
+  "visual_identity": {
+    "identity_id": "cumcm-global-v1",
+    "primary_color": "#355C7D",
+    "support_color": "#2A9D8F",
+    "conclusion_color": "#D98254",
+    "semantic_consistency_pass": true
+  },
+  "signature_policy": {
+    "track": "national-first",
+    "required": true,
+    "minimum_count": 1,
+    "exemption": null
+  },
+  "figures": [
+    {
+      "id": "fig-q1-mechanism-result",
+      "category": "time_series",
+      "purpose": "把临界边界、关键事件与报告误差闭合置于同一阅读链",
+      "claim_ids": ["C-Q1-03"],
+      "source_data": ["求解/问题一/结果/curve.csv"],
+      "generator": "求解/问题一/plot_curve.py",
+      "vector_output": "论文/figures/q1-mechanism-result.pdf",
+      "raster_output": "审查/figure-renders/q1-mechanism-result-actual.png",
+      "raster_dpi": 360,
+      "insert_width_mm": 150,
+      "final_min_font_pt": 8.5,
+      "panel_layout": {
+        "panel_count": 3,
+        "mode": "subcaptions_below",
+        "panel_roles": ["边界与机制", "事件时刻", "误差闭合"],
+        "panel_titles_inside": false,
+        "subcaption_alignment": "centered-below",
+        "gutter_consistent": true,
+        "shared_claim": true
+      },
+      "evidence_enrichment": {
+        "bare_basic_plot": false,
+        "layers": ["primary_curve", "feasible_boundary", "event_marker", "secondary_state"],
+        "key_readout": "边界首次跨越零点的时刻与误差进入阈值区间的时刻一致",
+        "why_not_table_or_text": "需要同时辨认连续演化、事件先后和跨面板闭合关系"
+      },
+      "signature_figure": true,
+      "signature_archetype": "a_mechanism_result",
+      "core_claim": "边界触发关键事件并使误差在报告精度内闭合",
+      "ten_second_takeaway": "越过临界边界后误差降至阈值内",
+      "read_order": ["机制与边界", "关键事件", "结论与残差"],
+      "data_linkage": {
+        "claim_ids": ["C-Q1-03"],
+        "source_fields": ["time", "boundary_margin", "error"],
+        "panel_links": ["边界零点->事件时刻", "事件时刻->残差闭合"],
+        "pass": true
+      },
+      "signature_checks": {
+        "integrated_narrative": true,
+        "mechanism_to_result": true,
+        "adds_explanatory_responsibility": true,
+        "not_palette_only": true,
+        "not_decorative_collage": true,
+        "thumbnail_silhouette_pass": true,
+        "ten_second_read_pass": true,
+        "final_page_visual_pass": true
+      },
+      "generation": {
+        "mode": "script",
+        "renderer": "python",
+        "tool": "求解/代码/plot_q1_mechanism.py",
+        "spec_path": "审查/figure-specs/q1-mechanism-result.json",
+        "provenance_manifest": "审查/provenance/q1-mechanism-result.json"
+      },
+      "vector_audit": {
+        "true_vector": true,
+        "aspect_ratio_distortion": 0.0
+      },
+      "visual_review": {
+        "actual_size_render": "审查/figure-renders/q1-mechanism-result-actual.png",
+        "full_page_render": "审查/figure-renders/q1-mechanism-result-page.png",
+        "thumbnail_render": "审查/figure-renders/q1-mechanism-result-thumb.png",
+        "grayscale_render": "审查/figure-renders/q1-mechanism-result-gray.png",
+        "publication_ready": true,
+        "review_mode": "manual",
+        "reviewed_by": "independent-visual-reviewer",
+        "reviewed_at": "2026-08-09T10:30:00+08:00",
+        "manual_review_record": "审查/reviews/q1-mechanism-result.json"
+      },
+      "style": {
+        "background": "white",
+        "color_count": 3,
+        "colorblind_safe": true,
+        "data_geometry_untouched": true,
+        "units_complete": true,
+        "final_page_checked": true,
+        "grayscale_pass": true,
+        "title_inside": false,
+        "decorative_effects": false,
+        "legend_occludes_data": false,
+        "default_software_theme": false,
+        "manual_data_point_editing": false
+      },
+      "role_specific_checks": [
+        {
+          "id": "event_linkage",
+          "pass": true,
+          "evidence": "边界零点、事件标记和残差使用同一结构化事件时刻"
+        }
+      ]
+    }
+  ]
+}
