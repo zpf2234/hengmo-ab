@@ -10,8 +10,8 @@ four-step scaffolds, purpose-before-method openings and cross-question sameness.
 Thresholds are frozen from the measured distribution of the 50 excellent-paper
 abstracts (2026-08-13 snapshot, see references/corpus-voice-profile.md). When the
 local corpus is present the baseline is recomputed and reported for reference,
-but pass/fail always uses the frozen thresholds so the gate cannot drift when
-corpus files change.
+and frozen thresholds prioritize review only; no style statistic proves
+authorship or fails the audit. Empty or missing inputs still fail.
 
 Fail-closed: no auditable body text means fail.
 """
@@ -19,6 +19,7 @@ Fail-closed: no auditable body text means fail.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import statistics
@@ -30,7 +31,7 @@ if hasattr(sys.stdout, "reconfigure"):
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 CONNECTORS = re.compile(
     r"首先|其次|最后|此外|然后|接着|在此基础上|进一步地|与此同时|总的来说|由此可见|值得注意的是|综上所述"
@@ -45,6 +46,7 @@ BUILTIN_BASELINE = {
     "iso_pairs": {"min": 0, "p10": 0, "median": 0, "p90": 0, "max": 3},
 }
 
+# Legacy hard_* key names are retained for report compatibility; all style hits are review-only.
 THRESHOLDS = {
     "hard_iso_pairs": 4,          # corpus max is 3
     "hard_sentence_cv": 0.25,     # corpus min is 0.302
@@ -218,11 +220,11 @@ def analysis_narrative_metrics(text: str) -> tuple[dict[str, object], list[str],
     hard: list[str] = []
     soft: list[str] = []
     if fixed_four_count:
-        hard.append(
+        soft.append(
             f"fixed_four_step_questions={fixed_four_count}（把职责池写成固定四步/四段）"
         )
     if purpose_question_count >= ANALYSIS_THRESHOLDS["hard_repeated_purpose_method_questions"]:
-        hard.append(
+        soft.append(
             f"purpose_method_questions={purpose_question_count}, purpose_method_hits={purpose_hits}"
             "（命中不同问题，判为跨问重复‘为了……采用……’）"
         )
@@ -238,19 +240,19 @@ def analysis_narrative_metrics(text: str) -> tuple[dict[str, object], list[str],
                 "（单问单次命中，不判跨问；检查是否可从对象、约束或异常直接起句）"
             )
     if triple_count >= ANALYSIS_THRESHOLDS["hard_repeated_triple_sequence"]:
-        hard.append(
+        soft.append(
             f"triple_sequence_questions={triple_count}（跨问复制‘首先—然后/其次—最后’骨架）"
         )
     elif triple_count:
         soft.append("triple_sequence_questions=1（确认顺序词承担真实计算时序）")
     if prefix_pairs >= ANALYSIS_THRESHOLDS["hard_opening_template_pairs"]:
-        hard.append(
+        soft.append(
             f"opening_template_pairs={prefix_pairs}（问题编号归一化后，跨问开头同构）"
         )
     elif prefix_pairs:
         soft.append(f"opening_template_pairs={prefix_pairs}（人工复核跨问开头）")
     if formulaic_count >= 2:
-        hard.append(
+        soft.append(
             f"formulaic_openings={formulaic_count}（多问从顺序/目的套话起句，未由本题内容驱动）"
         )
     elif formulaic_count:
@@ -318,16 +320,16 @@ def judge(metrics: dict[str, object], is_abstract: bool) -> tuple[list[str], lis
     soft: list[str] = []
     t = THRESHOLDS
     if metrics["iso_pairs"] >= t["hard_iso_pairs"]:
-        hard.append(f"iso_pairs={metrics['iso_pairs']} >= {t['hard_iso_pairs']}（段首同构，语料上限 3）")
+        soft.append(f"iso_pairs={metrics['iso_pairs']} >= {t['hard_iso_pairs']}（段首同构，语料上限 3）")
     elif metrics["iso_pairs"] >= t["soft_iso_pairs"]:
         soft.append(f"iso_pairs={metrics['iso_pairs']}（语料 47/50 为 0，人工复核）")
     if metrics["n_sentences"] >= t["min_sentences_for_cv"]:
         if metrics["sentence_cv"] < t["hard_sentence_cv"]:
-            hard.append(f"sentence_cv={metrics['sentence_cv']} < {t['hard_sentence_cv']}（机械均匀句长，语料最低 0.302）")
+            soft.append(f"sentence_cv={metrics['sentence_cv']} < {t['hard_sentence_cv']}（机械均匀句长，语料最低 0.302）")
         elif metrics["sentence_cv"] < t["soft_sentence_cv"]:
             soft.append(f"sentence_cv={metrics['sentence_cv']}（低于语料最低值附近，人工复核）")
     if metrics["conn_density"] > t["hard_conn_density"]:
-        hard.append(f"conn_density={metrics['conn_density']}/千字 > {t['hard_conn_density']}（模板连接词失控，语料最高 17.98）")
+        soft.append(f"conn_density={metrics['conn_density']}/千字 > {t['hard_conn_density']}（模板连接词失控，语料最高 17.98）")
     elif metrics["conn_density"] > t["soft_conn_density"]:
         soft.append(f"conn_density={metrics['conn_density']}/千字（超语料 P90=11.44，人工复核）")
     if is_abstract and metrics["num_density"] < t["soft_abstract_num_density"]:
@@ -406,11 +408,14 @@ def main() -> int:
     missing = []
     hard_total = 0
     soft_total = 0
+    paper_source = None
     for path in files:
         if not path.exists():
             missing.append(str(path.relative_to(root)))
             continue
-        raw = path.read_text(encoding="utf-8", errors="replace")
+        source_bytes = path.read_bytes()
+        raw = source_bytes.decode("utf-8", errors="replace")
+        source_sha256 = hashlib.sha256(source_bytes).hexdigest()
         abstract_block = extract_abstract(raw)
         is_abstract = "摘要" in path.stem or "abstract" in path.stem.lower() or abstract_block is not None
         prose = latex_to_prose(abstract_block if abstract_block is not None else raw)
@@ -422,6 +427,8 @@ def main() -> int:
                 "skipped": "text too short for voice metrics",
             })
             continue
+        if path.resolve() == root / "论文" / "论文.tex":
+            paper_source = {"path": "论文/论文.tex", "sha256": source_sha256}
         hard, soft = judge(metrics, is_abstract) if metrics is not None else ([], [])
         analysis_metrics = None
         if analysis_audit is not None:
@@ -432,6 +439,7 @@ def main() -> int:
         soft_total += len(soft)
         record = {
             "file": str(path.relative_to(root)),
+            "source_sha256": source_sha256,
             "is_abstract": is_abstract,
             "hard": hard,
             "soft": soft,
@@ -456,6 +464,8 @@ def main() -> int:
         "builtin_baseline": BUILTIN_BASELINE,
         "recomputed_baseline": recomputed,
         "manual_review_required": True,
+        "paper_source": paper_source,
+        "pass_scope": "readable inputs and completed mechanical scan; not prose quality approval",
         "records": records,
     }
 

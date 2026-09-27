@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression test for the two semi-automatic user confirmation gates."""
+"""Regression test for the two confirmation gates and simulation override."""
 
 from __future__ import annotations
 
@@ -76,6 +76,31 @@ def main() -> int:
         code, payload = run(root, "--phase", "draft")
         cases["changed_plan_invalidates_confirmation"] = code == 1 and any(
             "changed" in item for item in payload.get("errors", [])
+        )
+
+        simulation_root = root / "simulation"
+        simulation_root.mkdir()
+        (simulation_root / ".cumcm_state.json").write_text(
+            json.dumps({
+                "workflow_policy": {
+                    "mode": "simulation",
+                    "method_result_confirmation_required": False,
+                    "outline_page_confirmation_required": False,
+                }
+            }, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        code, payload = run(simulation_root, "--phase", "paper-plan")
+        cases["simulation_skips_method_result_confirmation"] = (
+            code == 0
+            and payload.get("mode") == "simulation"
+            and payload.get("confirmation_required") is False
+        )
+        code, payload = run(simulation_root, "--phase", "draft")
+        cases["simulation_skips_outline_page_confirmation"] = (
+            code == 0
+            and payload.get("mode") == "simulation"
+            and payload.get("confirmation_required") is False
         )
 
     result = {"schema_version": 1, "pass": all(cases.values()), "case_count": len(cases), "cases": cases}

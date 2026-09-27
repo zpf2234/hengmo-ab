@@ -1,6 +1,6 @@
 ---
 name: cumcm-paper
-description: 数学建模国赛优秀论文导向的半自动撰写、章节编排与编译总控技能。仅在方法结果获用户确认后生成全文目录、大纲和页数方案；再次获确认后才把证据写入单一总稿并执行编译审查。
+description: 数学建模国赛优秀论文导向的半自动撰写、章节编排与编译总控技能。正式项目在方法结果和目录页数分别获用户确认后才进入下一阶段；明确标记为 simulation 的模拟项目可跳过这两个停点，但仍执行完整证据链和审查。
 ---
 
 # CUMCM 论文阶段
@@ -22,7 +22,8 @@ description: 数学建模国赛优秀论文导向的半自动撰写、章节编�
 - `求解/证据矩阵.csv`
 - `求解/图表清单.md`
 - `求解/证据审计.md` 为 PASS
-- `审查/用户确认节点.json` 中方法与结果确认有效；核验规则见
+- 正式项目要求 `审查/用户确认节点.json` 中方法与结果确认有效；模拟项目由 `.cumcm_state.json` 的
+  `workflow_policy.mode=simulation` 明确跳过两个确认停点。核验规则见
   [半自动论文工作流](../cumcm/references/semi-automatic-workflow.md)
 
 ## 章节阶段链
@@ -34,7 +35,8 @@ outline(STAGE) → restatement(STAGE) → analysis(STAGE) → assumptions(STAGE)
   → cumcm-notation → model-writing(STAGE) → cumcm-results-validation
   → cumcm-notation（全文公式复核）
   → evaluation(STAGE) → references(STAGE) → appendix(STAGE) → abstract(STAGE)
-  → cumcm-deai → language-audit(STAGE) → 编译与 cumcm-review
+  → 内部编译候选 → cumcm-deai → language-audit(STAGE)
+  → 重编译与全文相似度 → 首次初稿放行 → cumcm-review
 ```
 
 阶段规则分别位于
@@ -56,10 +58,11 @@ outline(STAGE) → restatement(STAGE) → analysis(STAGE) → assumptions(STAGE)
 `1.问题重述.tex` 等章节文件，也不使用章节级 `\input`、`\include` 或 subfiles。
 职责链可以分阶段执行，但最终源码始终是一个总稿。
 上一阶段门禁不通过时回退修订或补算，禁止用说明性文字遮盖证据缺口。
-用户要求“直接生成整篇”也不覆盖本项目的半自动确认规则。方法结果确认后，先只生成全文目录、
+正式项目即使用户要求“直接生成整篇”也不覆盖本项目的半自动确认规则。方法结果确认后，先只生成全文目录、
 逐节大纲和各问/共享章节页数判断并停下；用户再次确认无误并要求开始初稿后，才创建模板、执行
 逐问清单、增量成文、编译和页数反馈闭环。规划上界不超过 30 页；成稿后页数只检查是否超过官方
-上限，内容完整性由逐问门禁独立判断。
+上限，内容完整性由逐问门禁独立判断。模拟项目仅在状态明确标记为 `simulation` 时跳过两个停点，
+仍执行相同的证据、逐问深度和编译审查。
 
 前置章节同时读 [references/front-section-content-standard.md](references/front-section-content-standard.md)，
 逐问主体同时读 [references/model-result-content-standard.md](references/model-result-content-standard.md)，
@@ -67,10 +70,14 @@ outline(STAGE) → restatement(STAGE) → analysis(STAGE) → assumptions(STAGE)
 收束章节同时读 [references/closing-section-content-standard.md](references/closing-section-content-standard.md)。
 这些统计只用于发现职责缺口和冗余，不能成为字数、标题数、图数或文献数配额。
 
-同时读 [references/official-rules.md](references/official-rules.md)、
+同时读 [references/official-rules.md](references/official-rules.md) 和
+[../cumcm/references/current-knowledge-2026-09.md](../cumcm/references/current-knowledge-2026-09.md)、
 [references/sections.md](references/sections.md) 与
 [references/a053-argument-chain.md](references/a053-argument-chain.md)。A053 只冻结可迁移的功能推进链，
-不得复用其具体模型、符号、公式、数值、图表、标题或句子。LaTeX 细节见
+不得复用其具体模型、符号、公式、数值、图表、标题或句子。全文起草同时读取
+[论证叙事规范](../cumcm/references/argumentation-patterns.md) 与
+[A053 句法与叙事规范](../cumcm-deai/references/a053-narrative-grammar.md)，以其参赛队向评委讲述
+题目理解和真实求解的书面口吻为全局风格主锚，贯穿起草、改写和审查。LaTeX 细节见
 [references/latex-template.md](references/latex-template.md)。本工作区的人工写作与排版硬规则见
 [references/style-profile.md](references/style-profile.md)。若本地有优秀论文语料，同时读
 [../cumcm/references/benchmarking.md](../cumcm/references/benchmarking.md) 和
@@ -132,12 +139,21 @@ outline(STAGE) → restatement(STAGE) → analysis(STAGE) → assumptions(STAGE)
 
 ## 原创性约束
 
-- 优秀论文只用于质量校准，不复用标题、摘要句式、段落结构、专属模型链、图号、数值或代码。
+- 优秀论文只用于质量校准，不复制专属题名、摘要句式、段落结构、模型链、图号、数值或代码；常规功能标题和标准术语可以一致。
 - 同题常用术语可以一致，但推导组织、解释和结论必须来自本项目证据。
 - 禁止把参考论文的“首先—接着—然后—最后”段落替换少量词后使用。
-- 成稿后必须运行相似度审计；高风险时重写相关段落，而不是机械同义替换。
+- 首次交付前必须运行全语料全文相似度审计，不由摘要相似度决定是否查正文；高风险时核对来源并
+  独立重写相关论证，而不是机械同义替换。覆盖不完整、未测或旧 PDF 报告不能放行。
 
 ## 去 AI 化
+
+首次交付前就完成全文复核，按 [逐问深度与初稿协议](references/question-depth-and-pagination.md) 将去 AI、
+语言和原创性证据绑定到当前总稿、PDF 和未改写基线。内部语义审查者可为 AI 或参赛队员，必须如实
+记录类型；AI 的检查不代表参赛队已完成人工核验，待核验状态不能改成“已完成”。
+
+问题分析、建模段落和摘要形成时即检查措辞与证据范围，成稿后再做全文复核。改稿须比较是否
+新增重复总结、夸张标题、来源变形或结论升级；字数增加、术语增加不算质量提升。允许写前生成
+小标题并随正文调整，不设“成文后才能命名”的前置限制。
 
 先执行 `cumcm-deai`：逐部分对照优秀论文同部分原文与
 `cumcm-deai/references/corpus-voice-profile.md` 的声纹画像，改写 AI 味段落并通过
@@ -146,12 +162,18 @@ outline(STAGE) → restatement(STAGE) → analysis(STAGE) → assumptions(STAGE)
 
 - 摘要和正文采用参赛队员向评委讲述实际理解与求解过程的视角，允许自然、较多地使用“我们”；
   不设“我们”次数上限，也不把第一人称复数本身判为 AI 味；
+- 全文从起草时就按 A053 的对象、推理、公式和结果承接来写；每问概述与必要推导在改写后仍须
+  保留，按 [建模完整性](../cumcm/references/per-question-understanding.md#建模完整性) 逐项核对，
+  不能只统一措辞而留下条件、分支、参数或输出恢复缺口；
 - 删除无逻辑作用的“此外、值得注意的是、综上所述”和机械“首先—其次—最后”；
 - 把“显著、卓越、具有重要意义、应用前景广阔”等空泛判断改成可观察结果、适用范围或局限；
 - 删除“便于、有助于、本文报告、不声明、不构成证明、不能据此宣称”等自我评价或元叙事，
   只保留模型结构、数值事实和客观不确定性；
 - 正文按 A053 式“对象/现象—数学关系—公式或算法—定量结果—局部检验”推进；
   原稿、重构、统一口径、计数闭合、证据边界、模型链和门禁说明只进审查文件；
+- 按 [成熟公式与本题推导](../cumcm/references/mathematical-writing.md#成熟公式与本题推导)，
+  成熟公式沿用惯用形式并解释本题用途，新增关系从依据逐步引出；定义、近似、拟合与定理推论
+  如实区分，保留必要条件和推导，让评委能从公式附近的文字顺读其含义与作用；
 - 避免每段同构、强凑三点、重复小结和同义词轮换，允许长短句自然变化；
 - 智能算法的执行过程可以采用 `Step1`、`Step2` 等步骤列表；步骤规整本身不判为 AI 味，只要每步
   写清本题变量、运算、判断、约束处理和输出，不照抄通用算法原理，也不把简单算法强拆成四步；
@@ -189,8 +211,8 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 附录与支撑材料清单
 ```
 
-问题重述与问题分析必须使用两个独立一级章。问题重述固定采用“一、问题重述—1.1 问题背景—
-1.2 问题提出”的标题结构：背景只用一个紧凑段落交代对象与场景；问题提出先概括共同条件，
+问题重述与问题分析使用两个独立一级章。问题重述可采用“问题背景—问题提出”二级结构，
+内容较少时也可直接成文：背景紧凑交代对象与场景；问题提出先概括共同条件，
 再以段内加粗的“问题一：”“问题二：”逐问重述对象、输入、约束、任务和输出。各分问不得升为
 三级标题。重述必须用自己的话重新组织，不得照抄题面，也不得写问题分析、模型、求解、结果、
 验证、评价、改进或推广。问题分析另行说明数据特征、难点、问题依赖和模型路线。
@@ -199,18 +221,22 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 只有符号定义是理解假设不可缺少的前提时例外并记录理由。符号说明不得
 埋入其他章节；第四章标题后直接放“符号—含义—单位”三列表，“含义”按内容写物理含义或数学
 含义，无单位项写“—”。主符号优先简洁，能由上下文区分时不加下标，只在真实对象或编号需要时
-保留一层必要索引。必要说明只陈述共同约定或适用范围且保持一至两句，不作评价。具体公式推导、参数求取和数值求解过程
-集中放入第五章；问题分析只保留高层思路与路线。各问的结果检验优先就地完成；只有题目确实需要跨问检验且存在
+保留一层必要索引。必要说明只陈述共同约定或适用范围且保持一至两句，不作评价。
+按 [简洁符号与下标](../cumcm/references/mathematical-writing.md#简洁符号与下标) 全文不用复杂
+下标公式：嵌套或长串下标必须改写，复杂关系用有含义的中间量展开，保持原模型的必要区分。
+具体公式推导、参数求取和数值求解过程集中放入第五章；问题分析只保留高层思路与路线。
+各问的结果检验优先就地完成；只有题目确实需要跨问检验且存在
 两类以上实质内容时，才独立设“结果检验”章。
 一级标题由模板显示为中文序数，目录深度控制在三级。第五章通常以“问题一”“问题二”作为二级标题；
 只有短任务名确能帮助定位时才写“问题一：临界角求解”这类形式。每问默认不设或只设 1--3 个三级标题，
 同一问题超过 3 个时先检查能否连续成文或改用段内短语；语料中的标题数和分问页数不是填充目标。
-固定一级章顺序不变，但第五章内的小标题须在正文稳定后从真实内容中提取。优先使用“受力分析”
+一级章按已确认的目录组织；各级小标题允许写前规划、写中调整，没有正文完成后才能命名的限制。优先使用“受力分析”
 “运动方程”“目标函数”“参数辨识”“数值求解”“误差分析”等简洁、可展示的学科表达，一般
-4--10 个汉字；不强行拼成“对象 + 关系/动作 + 必要条件”的满载标题。不得使用“问题一模型的建立与求解”
-“问题二求解与分析”，也不得把“口径、审计、闭环、证据链、门禁、误差预算、作答映射”等内部职责写进标题。
-问题标题后可直接进入正文，不强制补路线段，也不为避免标题相邻而制造过渡话。正文从本题对象、条件、
-关系或本队实际计算动作起句；只有路线确实复杂时才用一两句交代。审计结论、原稿与重构说明、口径核对、
+短而清楚即可，字数只提示复核；不强行拼成“对象 + 关系/动作 + 必要条件”。允许“问题一模型的建立与求解”
+“问题二求解与分析”等常规标题；避免把“口径审计、证据闭环、门禁、作答映射”等内部职责写进标题。
+每问标题后必须先有一段开头概述，让评委明白本问任务、决定性条件或关系以及实际求解主线，随后
+再进入下级小节、公式与算法。概述从本题对象或条件起句，不统一句式或字数，后文须兑现其主线。
+审计结论、原稿与重构说明、口径核对、
 门禁状态、证据边界或模型链总结一律留在 `审查/`，不得改写成正文中的读者导航。
 成文前先按各问的推导难度、结果重要性和必要检验量确定大致页数区间，并说明判断依据；再把前置
 章节、评价、AI 声明和参考文献计入共享篇幅，确认规划上界不超过 30 页。实际成稿不要求各问等长，也不要求八项职责
@@ -222,7 +248,9 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 
 每问必须闭环：
 
-1. 界定口径、变量、目标和约束；
+1. 按 [逐问题意理解与建模入口](../cumcm/references/per-question-understanding.md)，在每问标题
+   后先写一段概述，说明任务、决定性条件或关系和求解主线，再进入下级小节、变量定义、核心式
+   或算法；后续推导与求解须兑现该主线；
 2. 说明方法为何适配；
    当候选路线实质影响答案时，给出决定性比较和取舍；
 3. 给出必要且连续的数学表达；
@@ -242,9 +270,9 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 不按固定公式数、图数或字数填充。公式服务于可复现推导，图表服务于关键结论；按官方唯一口径
 计算的正文不得超过 30 页，不另设页数下限。
 
-模型选择跨越多问时放在问题分析；只影响单问时放在该问模型小节。只写最终采用路线及真正影响
-答案的简短理由，不在正文制作候选模型、方法选择或验证结果对照表，也不展示内部试错、文件名或
-审查门禁。若基本规律唯一，用一句话说明主模型和独立复算路线即可。
+模型选择跨越多问时放在问题分析；只影响单问时放在该问模型小节。说明最终路线及真正影响答案的
+理由，保留证明选择、实质改进或独立验证所必需的公平对照表和消融结果；完整试算与淘汰清单、文件名
+和审查门禁留在内部。若基本规律唯一，用一句话说明主模型和独立复算路线即可。
 
 模型评价与逐问验证不得混为一体。逐问验证回答结果是否可信；全文评价则按“结构/方法—已展示证据—
 可靠性”“触发条件—受影响结论—证据范围”“局限—新增信息或处理—可验证改进”组织，推广再说明
@@ -252,7 +280,8 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 
 ## 增量成文纪律
 
-- 先运行 `audit_user_confirmations.py --phase paper-plan`；未通过时不得进入 outline 或接触论文模板。
+- 先运行 `audit_user_confirmations.py --phase paper-plan`；正式项目未通过时不得进入 outline 或接触论文模板，
+  模拟项目只有在状态明确标记后才允许该命令自动放行。
   通过后按 [../cumcm-outline/STAGE.md](../cumcm-outline/STAGE.md) 创建
   `审查/逐问深度清单.json`；按 [references/a053-argument-chain.md](references/a053-argument-chain.md)
   逐问冻结角色、计划页数区间及依据、题目化小节树、完整推导路径、结果命题、验证/边界计划、表达载体、题面要求以及
@@ -261,8 +290,8 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
   同一来源可支撑相邻职责，但每项任务、预期结论和验证对象必须分别可核对；结构性条件不适用时
   必须写明理由，且不得拿尚未成文的论文正文自证。将全文目录、逐节大纲、各问及共享章节页数
   判断完整展示给用户后停下，不创建 `论文/论文.tex`。
-- 用户明确确认目录、大纲和页数无误并要求开始初稿后，记录第二次确认并运行
-  `audit_user_confirmations.py --phase draft`。未通过时不得继续；通过后才从单一总稿模板落盘
+- 正式项目须由用户明确确认目录、大纲和页数无误并要求开始初稿，记录第二次确认并运行
+  `audit_user_confirmations.py --phase draft`；模拟项目由状态明确跳过该停点。未通过时不得继续；通过后才从单一总稿模板落盘
   `论文/论文.tex`，写入摘要并完成首次编译，再写正文；不得长时间只在
   内存中组织整篇稿件。
 - 每完成一问，先运行
@@ -275,9 +304,12 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 - 模型、结果和验证公式稳定后回到 `cumcm-notation`，运行全文公式可读性审计；随后完成评价、AI 工具
   使用声明、参考文献、附录和定稿摘要。所有计入或影响官方正文口径的章节完成之前，增量编译只作诊断，
   不执行完整初稿放行。
-- 第一份可交付初稿候选只能在上述章节全部完成后两遍编译，再用 `audit_question_depth.py --record-compile` 记录
-  `appendix:start - body:start`、PDF 总页数和当前 PDF SHA-256。正文与总页数必须分开报告。
-- 记录后必须执行 `check_first_draft_gate.py --root .`。该命令是阶段转换的唯一机器闸门：只有
+- 上述章节全部完成后，两遍编译并用 `audit_question_depth.py --record-compile` 记录
+  `appendix:start - body:start`、PDF 总页数和当前 PDF SHA-256。正文与总页数分开报告；内容和页数合格
+  的构建仍是 `INTERNAL_REVIEW_CANDIDATE`、`deliverable=false`，不预先授予初稿身份。
+- 完成全文去 AI 表达、语义复核、语言检查及提示处置，改稿后重编译、刷新深度记录，对当前 PDF
+  运行 `benchmark_corpus.py --fail-on-similarity`；按逐问深度协议填写真实审查者与基线、报告哈希绑定。
+  随后执行 `check_first_draft_gate.py --root .`。该命令是阶段转换的唯一机器闸门：只有
   `PASS_FIRST_DELIVERABLE_DRAFT` 才首次产生初稿。超过 30 页的 PDF 记为 `INTERNAL_FAILED_BUILD`、
   `deliverable=false`；页数较短不自动失败，但逐问门禁有缺口时仍须回到相应推导、参数来源、求解
   契约、结果解释、独立验证、风险边界或漏答项，完成后重新编译。
@@ -304,8 +336,9 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 
 ## 正文密度
 
-- 正文只按官方口径计算：`appendix:start - body:start`，即正文主体首页至附录开始前一页；
-  其中包含正文主体、AI 工具使用声明和参考文献，不含摘要与附录。
+- 正文区按项目构建口径计算：`appendix:start - body:start`，即正文主体首页至附录开始前一页；
+  其中包含正文主体、AI 工具使用声明和参考文献，不含摘要与附录。官方硬约束是正文从第四页开始且
+  不超过 30 页。
 - 30 页及当年更低的官方上限是唯一页数硬门槛；项目不设页数下限。不得用重复题面、放大图表或
   稀疏排版制造篇幅。
 - 50 篇语料的 PDF 总页数最小值/Q1/中位数/Q3 为 24/34/42/56；旧脚本所得“参考文献前页数”
@@ -362,7 +395,7 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
   在各面板下方居中放小标题，再在整组下方放总图题。
 - 不用默认单折线或默认柱图补版面；连续曲线必须同时呈现事件、阈值、边界、阶段、基线或
   不确定性中的至少一层，方案比较优先点—区间图或表格。
-- 官方口径正文（正文主体首页至附录开始前一页，包含 AI 声明和参考文献）不得超过 30 页；
+- 项目正文区（正文主体首页至附录开始前一页，包含 AI 声明和参考文献）对照官方不超过 30 页的硬约束；
   篇幅由当前题目的完整论证自然形成。版面质感借鉴国一优秀论文，但具体图型按
   `cumcm-figures/references/visual-identity-and-archetypes.md` 的原型库依证据结构选择，
   模型决策流程图、多阶段演化拼图、临界构型图、机理—结果联图均为候选原型而非固定套图。
@@ -390,7 +423,9 @@ AI工具使用声明（2026 年置于参考文献之前；按官方二选一原�
 - 摘要和正文主体不展示 AI 提示词、工具名、辅助脚注或生成过程。2026 年按官方规则在参考文献前
   设置“AI工具使用声明”，从 [official-rules.md](references/official-rules.md) 复制官方二选一原文；
   已使用时只在论文声明中简述用途，并在支撑材料压缩包内提供 `AI工具使用详情.pdf`。
-  AI 工具不列入参考文献，不向第三方平台上传论文做查重或 AIGC 检测。
+  官方 AI 页面没有规定 AI 工具一律不得列入参考文献；若工具或文档本身作为实际使用的公开资料，
+  按正常资料引用规则和赛区要求判断。不得向第三方平台上传论文做查重或 AIGC 检测，这是项目内部的
+  隐私与知识产权保护建议。
 - 论文数值表不得手抄。由结果 CSV/JSON 生成 LaTeX 表，或由构建脚本写出表格片段；结果重跑后必须重新生成并核对。
 
 ## 编译与视觉验收
@@ -405,23 +440,26 @@ python .agents/skills/cumcm-notation/scripts/audit_formula_readability.py --root
 python .agents/skills/cumcm-paper/scripts/audit_figure_table_narration.py --root .
 python .agents/skills/cumcm-figures/scripts/audit_figure_style.py --root .
 python .agents/skills/cumcm-diagrams/scripts/audit_diagram_style.py --root .
-python .agents/skills/cumcm-paper/scripts/audit_section_chain.py --root .
+python .agents/skills/cumcm-paper/scripts/audit_section_chain.py --root . --phase content
 ```
 
-只运行项目实际使用的图形审计；所有适用项与章节链都通过后再编译。自动扫描通过仍不能替代逐章、
-最终尺寸与整页人工复核。
+只运行项目实际使用的图形审计；内容阶段的章节检查不依赖尚未生成的首次初稿报告。自动扫描通过
+仍不能替代逐章、最终尺寸与整页复核；正式提交前的参赛队人工核验也不能由自动报告代填。
 
 ```bash
-cd 论文
-xelatex -interaction=nonstopmode 论文.tex
-xelatex -interaction=nonstopmode 论文.tex
-cd ..
+python .agents/skills/cumcm-paper/scripts/compile_paper.py --root .
 python .agents/skills/cumcm-paper/scripts/audit_question_depth.py --root . --record-compile
+python .agents/skills/cumcm/scripts/benchmark_corpus.py --root . --fail-on-similarity
+# 完成真实语义复核，并按逐问深度协议刷新 deai/language 阶段报告及当前源稿/PDF 哈希绑定后再放行
 python .agents/skills/cumcm-paper/scripts/check_first_draft_gate.py --root .
+python .agents/skills/cumcm-paper/scripts/audit_section_chain.py --root . --phase final
 python .agents/skills/cumcm-paper/scripts/audit_question_depth.py --root . --phase final
 ```
 
 验收：
+
+- `审查/编译绑定.json` 必须由上述真实两遍编译生成，源稿、依赖、PDF/AUX 的字节哈希一致；不提供
+  对现有旧 PDF 补签来源的捷径，失败编译撤销旧绑定但保留源码和原 PDF；
 
 - `论文/` 顶层只有 `论文.tex` 一个 TeX 总稿，且不含章节级导入命令；
 - `论文.log` 无 LaTeX Error，引用与编号已收敛；

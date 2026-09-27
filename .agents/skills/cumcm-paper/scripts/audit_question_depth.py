@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 import sys
@@ -132,7 +133,12 @@ def pdf_page_count(path: Path) -> int | None:
         try:
             from pypdf import PdfReader  # type: ignore
         except ImportError:
-            from PyPDF2 import PdfReader  # type: ignore
+            try:
+                from PyPDF2 import PdfReader  # type: ignore
+            except ImportError:
+                import fitz  # type: ignore
+                with fitz.open(path) as document:
+                    return len(document)
         return len(PdfReader(str(path)).pages)
     except Exception:  # noqa: BLE001
         return None
@@ -179,11 +185,26 @@ def measure_compilation(root: Path) -> tuple[dict[str, Any] | None, list[str]]:
         errors.append("appendix:start must be later than body:start")
     total_pages = pdf_page_count(pdf)
     if total_pages is None:
-        errors.append("PDF page count unavailable; install pypdf or PyPDF2")
+        errors.append("PDF page count unavailable; requires pypdf, PyPDF2 or PyMuPDF")
+    if total_pages is not None:
+        for label, page in (("body:start", body_start), ("appendix:start", appendix_start), ("references:start", references_start)):
+            if page is not None and not 1 <= page <= total_pages:
+                errors.append(f"{label} label falls outside the actual PDF")
+    owner = Path(__file__).resolve().with_name("compile_paper.py")
+    spec = importlib.util.spec_from_file_location("cumcm_compile_binding", owner)
+    if spec is None or spec.loader is None:
+        errors.append("compiled source receipt verifier unavailable")
+        binding = {}
+    else:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        binding, binding_errors = module.verify_compilation(root)
+        errors.extend(binding_errors)
     if errors:
         return None, errors
     assert body_start is not None and appendix_start is not None and total_pages is not None
     return {
+        **binding,
         "body_pages": appendix_start - body_start,
         "total_pdf_pages": total_pages,
         "body_start_page": body_start,
@@ -1050,7 +1071,7 @@ def validate_compile_feedback(
         missing = item.get("missing_depth_items")
         actions = item.get("actions")
         expected_status = (
-            "FIRST_DRAFT_CANDIDATE"
+            "INTERNAL_REVIEW_CANDIDATE"
             if isinstance(body_pages, int)
             and body_pages <= high
             and isinstance(missing, list)
@@ -1064,7 +1085,8 @@ def validate_compile_feedback(
                 f"{label}: build_status must be {expected_status}; "
                 "a failed build is never a draft"
             )
-        expected_deliverable = expected_status == "FIRST_DRAFT_CANDIDATE"
+        # Content and pagination never grant first-delivery authority by themselves.
+        expected_deliverable = False
         if item.get("deliverable") is not expected_deliverable:
             errors.append(
                 f"{label}: deliverable must be {str(expected_deliverable).lower()}"
@@ -1274,14 +1296,14 @@ def record_compile(
         feedback["iterations"] = iterations
     high = page_policy(root) if root is not None else 30
     body_pages = measurements["body_pages"]
-    deliverable = body_pages <= high and not missing and not actions
+    content_ready = body_pages <= high and not missing and not actions
     entry = {
         "iteration": len(iterations) + 1,
         "body_pages": body_pages,
         "total_pdf_pages": measurements["total_pdf_pages"],
         "pdf_sha256": measurements["pdf_sha256"],
-        "build_status": "FIRST_DRAFT_CANDIDATE" if deliverable else "INTERNAL_FAILED_BUILD",
-        "deliverable": deliverable,
+        "build_status": "INTERNAL_REVIEW_CANDIDATE" if content_ready else "INTERNAL_FAILED_BUILD",
+        "deliverable": False,
         "missing_depth_items": missing,
         "actions": actions,
     }

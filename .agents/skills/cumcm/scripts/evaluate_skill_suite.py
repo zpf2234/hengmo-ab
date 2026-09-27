@@ -8,6 +8,8 @@ import json
 import sys
 from pathlib import Path
 
+from benchmark_corpus import originality_report_issues
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
@@ -149,22 +151,8 @@ def evaluate_project(root: Path, track: str = "excellent") -> dict:
     if error:
         issues.append(error)
     else:
-        # benchmark_corpus.py owns the originality release rule and records it as
-        # originality_gate.verdict (manual review is validated there, including
-        # reviewer/scope and the no-release-on-high-similarity rule). Consume the recorded
-        # verdict instead of re-deriving a weaker copy from similarity.status.
-        gate = benchmark.get("originality_gate")
-        verdict = gate.get("verdict") if isinstance(gate, dict) else None
-        if verdict is not None:
-            if verdict not in ("PASS", "PASS_WITH_MANUAL_REVIEW"):
-                issues.append(f"原创性裁定未放行：{verdict}")
-        else:
-            # Reports predating the verdict: only a measured PASS provably agrees with both
-            # the old and the owner's rule; every other state is unproven originality.
-            similarity = benchmark.get("similarity", {})
-            similarity_status = similarity.get("status") if isinstance(similarity, dict) else None
-            if similarity_status != "PASS":
-                issues.append("报告缺 originality_gate 裁定且相似度实测非 PASS，原创门槛未证明")
+        # Share the producer's binding/coverage contract; old abstract-only PASS is stale.
+        issues.extend(originality_report_issues(benchmark, root / "论文" / "论文.pdf"))
 
     visual, error = read_json(root / "审查" / "视觉审查.json")
     if error:

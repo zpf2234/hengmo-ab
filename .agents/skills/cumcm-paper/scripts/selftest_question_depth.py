@@ -176,11 +176,11 @@ def valid_payload(body_pages: int = 23, total_pages: int = 42, digest: str = "a"
                     "total_pdf_pages": total_pages,
                     "pdf_sha256": digest,
                     "build_status": (
-                        "FIRST_DRAFT_CANDIDATE"
+                        "INTERNAL_REVIEW_CANDIDATE"
                         if body_pages <= 30
                         else "INTERNAL_FAILED_BUILD"
                     ),
-                    "deliverable": body_pages <= 30,
+                    "deliverable": False,
                     "missing_depth_items": [],
                     "actions": [],
                 }
@@ -392,8 +392,8 @@ def main() -> int:
                 "body_pages": 23,
                 "total_pdf_pages": 39,
                 "pdf_sha256": "c" * 64,
-                "build_status": "FIRST_DRAFT_CANDIDATE",
-                "deliverable": True,
+                "build_status": "INTERNAL_REVIEW_CANDIDATE",
+                "deliverable": False,
                 "missing_depth_items": [],
                 "actions": [],
             },

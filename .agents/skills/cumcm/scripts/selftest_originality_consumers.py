@@ -20,6 +20,8 @@ presence or absence of the originality issue, matched by substring.
 from __future__ import annotations
 
 import argparse
+import copy
+import hashlib
 import json
 import os
 import subprocess
@@ -27,7 +29,9 @@ import sys
 import tempfile
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+from benchmark_corpus import capture_corpus_source, compute_audit_basis, file_sha256
+
+SCHEMA_VERSION = 2
 
 # Consumers print Chinese JSON; on Windows a child Python defaults stdout to the ANSI code
 # page (cp936), which the UTF-8 reader here cannot decode. Force UTF-8 in the children and
@@ -107,8 +111,8 @@ CASES: dict[str, tuple[dict, bool]] = {
         },
         False,
     ),
-    # Reports written before the verdict existed: only a measured PASS is still accepted.
-    "legacy_pass_still_accepted": ({"similarity": {"status": "PASS"}}, False),
+    # An old PASS scanned only selected abstracts; it cannot certify current full coverage.
+    "legacy_pass_requires_new_audit": ({"similarity": {"status": "PASS"}}, True),
     "legacy_not_run_blocks": ({"similarity": {"status": "NOT_RUN"}}, True),
     # The closed hole: a bare manual note used to release the human-review band here even
     # though no producer ever wrote the key and no reviewer was named.
@@ -121,6 +125,27 @@ CASES: dict[str, tuple[dict, bool]] = {
         True,
     ),
     "legacy_missing_similarity_blocks": ({}, True),
+    "stale_candidate_hash_blocks": ({"candidate_pdf": {"sha256": "0" * 64},
+                                      "originality_gate": {"verdict": "PASS"}}, True),
+    "partial_corpus_coverage_blocks": ({"similarity": {"coverage": {"scope": "all_local_corpus_pdfs",
+                                        "complete": False, "candidate_complete": True,
+                                        "eligible_count": 3, "compared_count": 2}},
+                                        "originality_gate": {"verdict": "PASS"}}, True),
+    "peers_only_coverage_blocks": ({"similarity": {"coverage": {"scope": "selected_peers",
+                                    "complete": True, "candidate_complete": True,
+                                    "eligible_count": 1, "compared_count": 1}},
+                                    "originality_gate": {"verdict": "PASS"}}, True),
+    "missing_candidate_blocks": ({"originality_gate": {"verdict": "PASS"}}, True),
+    "stale_evidence_basis_blocks": ({"originality_gate": {"verdict": "PASS", "audit_basis_sha256": "0" * 64}}, True),
+    "manual_withdrawal_blocks": ({"originality_gate": {"verdict": "PASS_WITH_MANUAL_REVIEW"}}, True),
+    "manual_deletion_blocks": ({"originality_gate": {"verdict": "PASS_WITH_MANUAL_REVIEW"}}, True),
+    "manual_content_edit_blocks": ({"originality_gate": {"verdict": "PASS_WITH_MANUAL_REVIEW"}}, True),
+    "manual_failed_record_even_if_rebound_blocks": ({"originality_gate": {"verdict": "PASS_WITH_MANUAL_REVIEW"}}, True),
+    "manual_embedded_only_blocks": ({"originality_gate": {"verdict": "PASS_WITH_MANUAL_REVIEW"}}, True),
+    "corpus_modified_blocks": ({"originality_gate": {"verdict": "PASS"}}, True),
+    "corpus_added_blocks": ({"originality_gate": {"verdict": "PASS"}}, True),
+    "corpus_deleted_blocks": ({"originality_gate": {"verdict": "PASS"}}, True),
+    "corpus_snapshot_not_measurement_blocks": ({"originality_gate": {"verdict": "PASS"}}, True),
 }
 
 
@@ -182,8 +207,65 @@ def run_case(base: Path, name: str) -> dict:
     for consumer, collect in CONSUMERS.items():
         root = base / f"{name}--{consumer}"
         (root / "审查").mkdir(parents=True, exist_ok=True)
+        paper = root / "论文" / "论文.pdf"
+        paper.parent.mkdir(parents=True, exist_ok=True)
+        # Consumers only verify bytes/hash here, not PDF syntax (producer tests do that).
+        pdf_bytes = b"synthetic-current-candidate-binding"
+        if name != "missing_candidate_blocks":
+            paper.write_bytes(pdf_bytes)
+        digest = hashlib.sha256(pdf_bytes).hexdigest()
+        corpus = root / "fixture-corpus"
+        corpus.mkdir(parents=True, exist_ok=True)
+        (corpus / "reference-one.pdf").write_bytes(b"synthetic-reference-one")
+        (corpus / "reference-two.pdf").write_bytes(b"synthetic-reference-two")
+        payload = copy.deepcopy(report)
+        if not name.startswith("legacy_"):
+            payload.setdefault("schema_version", 2)
+            payload.setdefault("candidate_pdf", {"path": str(paper), "sha256": digest})
+            payload.setdefault("similarity", {}).setdefault("coverage", {
+                "scope": "all_local_corpus_pdfs", "complete": True, "candidate_complete": True,
+                "eligible_count": 2, "compared_count": 2, "incomplete_references": []})
+            payload.setdefault("originality_gate", {}).setdefault("candidate_pdf_sha256", digest)
+            payload["originality_gate"].setdefault("coverage_complete", True)
+            payload["corpus_source"] = capture_corpus_source(corpus, paper)
+            payload["similarity"]["per_reference"] = copy.deepcopy(payload["corpus_source"]["members"])
+            basis = compute_audit_basis(digest, payload["similarity"])
+            payload.setdefault("audit_basis_sha256", basis)
+            payload["originality_gate"].setdefault("audit_basis_sha256", basis)
+            if payload["originality_gate"].get("verdict") == "PASS_WITH_MANUAL_REVIEW":
+                review_path = root / "审查" / "原创性人工复核.json"
+                live_review = {"pass": True, "reviewer": "synthetic-independent-reviewer",
+                               "reviewer_type": "ai", "scope": "synthetic overlap fixture",
+                               "date": "2026-09-08", "candidate_pdf_sha256": digest,
+                               "audit_basis_sha256": basis}
+                review_path.write_text(json.dumps(live_review, ensure_ascii=False), encoding="utf-8")
+                payload["manual_review"] = copy.deepcopy(live_review)
+                payload["manual_review_file"] = {"path": str(review_path), "sha256": file_sha256(review_path)}
+                if name in {"manual_withdrawal_blocks", "manual_failed_record_even_if_rebound_blocks"}:
+                    live_review["pass"] = False
+                    review_path.write_text(json.dumps(live_review, ensure_ascii=False), encoding="utf-8")
+                elif name == "manual_deletion_blocks":
+                    review_path.unlink()
+                elif name == "manual_content_edit_blocks":
+                    live_review["scope"] = "changed review scope"
+                    review_path.write_text(json.dumps(live_review, ensure_ascii=False), encoding="utf-8")
+                elif name == "manual_embedded_only_blocks":
+                    payload.pop("manual_review_file")
+                if name == "manual_failed_record_even_if_rebound_blocks":
+                    payload["manual_review"] = live_review
+                    payload["manual_review_file"]["sha256"] = file_sha256(review_path)
+            if name == "corpus_modified_blocks":
+                (corpus / "reference-one.pdf").write_bytes(b"changed-reference-after-report")
+            elif name == "corpus_added_blocks":
+                (corpus / "new-reference.pdf").write_bytes(b"new-reference-after-report")
+            elif name == "corpus_deleted_blocks":
+                (corpus / "reference-two.pdf").unlink()
+            elif name == "corpus_snapshot_not_measurement_blocks":
+                payload["similarity"]["per_reference"][0]["sha256"] = "0" * 64
+                new_basis = compute_audit_basis(digest, payload["similarity"])
+                payload["audit_basis_sha256"] = payload["originality_gate"]["audit_basis_sha256"] = new_basis
         (root / "审查" / "优秀论文对标.json").write_text(
-            json.dumps(report, ensure_ascii=False), encoding="utf-8"
+            json.dumps(payload, ensure_ascii=False), encoding="utf-8"
         )
         issues = collect(root)
         hits = [

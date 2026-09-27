@@ -14,7 +14,15 @@ python .agents/skills/cumcm/scripts/run_skill_preflight.py --root . --no-write
 预检统一检查公开技能的 frontmatter、`agents/openai.yaml`、默认触发提示和相对链接，并运行总控一致性、
 相似度、原创性消费、语言、视觉、provenance、国一产物绑定、路由 parity、A/B 模型目录、单一总稿与
 附件交付、ZIP 内 AI 详情、RAR 清单与哈希绑定、答案/评分基准、审查兼容性和 `figure_mcp` 全部测试。
-预检不替代下方跨题型前向测试。
+预检还验证去 AI 改写不会改动数值、公式和引用，并确保试错、赶工、数值不规则或版面瑕疵不会被
+当作“像学生”的硬要求。预检不替代下方跨题型前向测试。
+
+首次交付与原创性回归还覆盖：摘要不同但正文重复、正文来源不在摘要最高或 top-k 邻近样本中、
+部分文本层缺失、旧稿/旧语料/撤回复核不得放行；语义来源变更与去重处置遗漏必须重审。
+编译绑定测试验证源稿、依赖、PDF、AUX 的对应关系及失败重编译撤销旧绑定；本机有 XeLaTeX 时另跑
+`python .agents/skills/cumcm-paper/scripts/selftest_compile_binding.py --real-compiler --no-write`。
+模型差异规则修改后，以独立场景检查换名候选、端到端成本、限时回退和当届资料边界；这些测试
+只检验工作方式，不证明未知赛题上的方法独创性或获奖等级。
 
 一次比赛是否真正覆盖模块，另由 `audit_skill_execution_plan.py` 审计。它区分公开 Skill、内部 STAGE、
 必经模块和条件模块；“全部使用”只允许解释为“全部适用模块有执行证据，全部不适用模块有明确理由”，
@@ -109,17 +117,31 @@ python .agents/skills/cumcm/scripts/evaluate_evidence_suite.py --projects <机�
 - 正文按 `appendix:start - body:start` 唯一计算，包含正文主体、AI 工具使用声明和参考文献，
   不含摘要与附录，并且不超过 30 页；
 - 原创相似度 PASS；
-- 语料声纹审计（`corpus-voice-audit.json`）硬项为零，去 AI 化审查 PASS，视觉审查明确图型适配 PASS；
+- 语料声纹审计（`corpus-voice-audit.json`）能扫描正文且复核项有处置记录；`authentic-expression-audit.json` 与改写前基线
+  比较的事实完整性为 PASS，全部表达复核信号有人工处置记录；去 AI 化审查 PASS，视觉审查明确图型适配 PASS；
 - 问题分析按各问真实对象、约束、数学转化、难点与依赖自然组织；跨问重复句架、固定四步标签和
   “首先—然后—最后”式机械串联为零，不以 150 字上限或等长段落裁切内容；关系图只在确有信息增益时出现；
+- 按 [逐问题意理解与建模入口](per-question-understanding.md) 逐问检查求解记录、第二章分析与
+  第五章入口：每问标题后、首个下级小节与公式之前有概述段，任务、决定性关系和求解主线可读，
+  后文兑现主线，三处同义且不整段重复；独立问、共享模型问、参数替换问均覆盖，不能用章级
+  引言、后面小节的补充解释、算法名称或固定句式模板通过此项；
+- 全文起草、改写和审查均采用 A053 主锚的参赛队讲述口吻；每问从题面输出逆查建模完整性，
+  特别覆盖遗漏约束/切换分支、不可识别却报唯一解、简化后未恢复原题输出及润色删去必要推理；
+  共享模型问与短问不豁免适用职责，风格通过不能替代模型或验证证据；
 - 核心公式在局部上下文中可读：式前说明目的，符号先给语义与单位，复杂关系先定义中间量再写主式，
   式后解释结构、约束或用途；所有多重修饰、嵌套下标和一式多关系风险均已简化或留下可核验保留理由；
+- 用户要求全文不用复杂下标公式：嵌套或长串下标实际改写，不能用保留理由豁免；必要短索引、
+  时间自变量和中间量保持原模型的对象对应、索引域及约束，不能因简化而合并不同量或漏掉条件；
+- 成熟公式与公认定理保留惯用写法并核对本题适用条件；新增关系有明确依据、关键推导和验证，
+  定义/近似/拟合/推论如实区分，复杂关系经中间量拆解后仍完整，局部文字能说明核心式的用途；
 - 图表叙述审计（`figure-table-narration.json`）硬项为零：题注、编号引用与解读文字合规；
 - 12 维评分总分不低于 54/60，且每维不低于 4；
 - 独立评审代理未发现 P0/P1 问题；
 - `审查/独立评审.json` 为 PASS，独立总分不低于 54/60 且最低维度不低于 4；
 - 与 3-5 篇邻近优秀论文相比，题目回答覆盖、验证强度和证据追溯不弱。
 - 正文只呈现最终采用的方法及必要理由；候选比较、试错过程与模型竞技记录仅保留在内部证据中。
+- 不为降低 AI 痕迹而改动数值尾数、隐藏统计结果、删除必要验证、编造试错或时间限制，也不故意制造
+  图表和排版瑕疵；自动表达信号不用于判断作者身份或 AI 使用比例。
 - 数据图在最终宽度下字体、单位、色觉与灰度区分、图例遮挡和整页构图均通过；正式结构图为
   TikZ/Visio 风格，连接、线语义、对象锚点、缩略图和整页渲染全部通过。
 
@@ -163,13 +185,13 @@ python .agents/skills/cumcm-blind-benchmark/scripts/validate_grading_standards.p
 - 问题重述、问题分析、模型假设、符号说明、逐问建模求解、结果验证、评价、引用、附录和摘要均由对应子技能门禁验收；
 - 自动语言审计对“计算口径”“本文的回答”“前者回答……后者回答……”“首次出现处定义”以及正文中的附件、文件、代码和脚本痕迹为零命中；
 - 模型假设默认位于符号说明之前；例外有明确结构理由；
-- 每问二级标题默认 2--4 个，超过 5 个已逐项证明不可合并；正文二级标题超过 24 个时有
-  合并审查记录；
+- 标题数量不作配额，普通标题能结合上下文定位内容；长标题和多标题只提示复核，不为过关强行合并或扩写；
 - 至少一名审查者逐节阅读正文，而不是仅依赖摘要、标题树和自动脚本。
 - 开写前先按各问难度、推导量、结果量和验证需求规划页幅，再统筹共享章节；计划上界不得超过 30 页。
   至少保留一次官方口径的实际编译页数反馈；内容补强只能对应推导、参数、求解、解释、验证、风险边界
   或漏答项，不得以背景、重复题面、装饰图或版式拉伸补页。
-- 首份可交付初稿门禁必须证明“内部失败构建（不可交付）→ 自动回到已冻结论证缺口 → 新 PDF 哈希 → 首次放行”的闭环；
+- 首份可交付初稿门禁必须证明“内部失败构建（不可交付）→ 回到已冻结论证缺口 → 真实编译新产物 →
+  内部待审候选 → 绑定当前产物的表达/语义/原创性复核 → 首次放行”的闭环；
   若失败构建曾获得初稿身份，或生成链没有继续到 `PASS_FIRST_DELIVERABLE_DRAFT`，回归失败。
 
 ## 防污染
@@ -204,6 +226,7 @@ python .agents/skills/cumcm/scripts/selftest_visual_audits.py --root .
 python .agents/skills/cumcm/scripts/selftest_language_audit.py --root .
 python .agents/skills/cumcm/scripts/selftest_provenance_registry.py
 python .agents/skills/cumcm-deai/scripts/selftest_corpus_voice.py
+python .agents/skills/cumcm-deai/scripts/selftest_authentic_expression.py
 python .agents/skills/cumcm-notation/scripts/selftest_formula_readability.py
 python .agents/skills/cumcm-paper/scripts/selftest_figure_table_narration.py
 python .agents/skills/cumcm-paper/scripts/selftest_question_depth.py --root . --no-write

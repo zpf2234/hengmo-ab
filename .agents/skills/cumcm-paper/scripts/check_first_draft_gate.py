@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Release the first deliverable draft after complete content and a compliant build.
+"""Release a reviewed first draft, not merely a complete and page-compliant build.
 
 A build above the official body-page maximum is an internal failed build.  A shorter
 build is not rejected by page count alone; question-level completeness remains a
@@ -9,6 +9,7 @@ separate hard gate.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import sys
@@ -30,6 +31,8 @@ REQUIRED_DRAFT_STAGES = (
     "references",
     "appendix",
     "abstract",
+    "deai",
+    "language-audit",
 )
 
 
@@ -43,6 +46,16 @@ def read_json(path: Path) -> Any:
 def load_depth_module():
     script = Path(__file__).resolve().parent / "audit_question_depth.py"
     spec = importlib.util.spec_from_file_location("cumcm_question_depth_for_first_draft", script)
+    if not spec or not spec.loader:
+        raise RuntimeError(f"cannot load {script}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_assurance_module():
+    script = Path(__file__).resolve().parent / "first_draft_assurance.py"
+    spec = importlib.util.spec_from_file_location("cumcm_first_draft_assurance", script)
     if not spec or not spec.loader:
         raise RuntimeError(f"cannot load {script}")
     module = importlib.util.module_from_spec(spec)
@@ -71,7 +84,7 @@ def stage_gate_errors(root: Path) -> list[str]:
             continue
         if gate.get("stage") != stage:
             errors.append(f"draft stage gate mismatch: {stage}")
-        if gate.get("status") != "pass" or gate.get("blocking_issues"):
+        if gate.get("status") != "pass" or gate.get("blocking_issues") != []:
             errors.append(f"draft stage is not complete: {stage}")
     return errors
 
@@ -141,16 +154,15 @@ def evaluate(
     if isinstance(body_pages, int):
         missing = latest.get("missing_depth_items") if latest else None
         actions = latest.get("actions") if latest else None
-        expected_deliverable = (
+        compiled_candidate = (
             body_pages <= high
             and isinstance(missing, list)
             and not missing
             and isinstance(actions, list)
             and not actions
         )
-        expected_build_status = (
-            "FIRST_DRAFT_CANDIDATE" if expected_deliverable else "INTERNAL_FAILED_BUILD"
-        )
+        expected_deliverable = False
+        expected_build_status = "INTERNAL_REVIEW_CANDIDATE" if compiled_candidate else "INTERNAL_FAILED_BUILD"
         if latest is not None and latest.get("build_status") != expected_build_status:
             blockers.append(
                 "compile record build_status violates failed-build/draft identity contract"
@@ -159,6 +171,25 @@ def evaluate(
             blockers.append(
                 "compile record deliverable flag violates failed-build/draft identity contract"
             )
+
+    assurance = load_assurance_module().evaluate_assurance(root, pdf_sha256)
+    blockers.extend(assurance["errors"])
+    input_hashes = dict(assurance["input_sha256"])
+    compile_binding = measurements.get("compile_manifest") if isinstance(measurements, dict) else None
+    if not isinstance(measurements, dict) or measurements.get("compilation_binding_verified") is not True or measurements.get("tex_sha256") != assurance["tex_sha256"]:
+        blockers.append("compiled PDF is not verified as a build of the current source and dependencies")
+    if not isinstance(compile_binding, dict) or compile_binding.get("path") != "审查/编译绑定.json":
+        blockers.append("compiled PDF lacks the controlled compilation manifest")
+    else:
+        receipt = root / compile_binding["path"]
+        if not receipt.is_file() or hashlib.sha256(receipt.read_bytes()).hexdigest() != compile_binding.get("sha256"):
+            blockers.append("compiled PDF compilation manifest hash is stale")
+        else:
+            input_hashes[compile_binding["path"]] = compile_binding["sha256"]
+    for relative in (MANIFEST_REL, "论文/论文.aux", *(f"审查/section-chain/gates/{stage}.json" for stage in REQUIRED_DRAFT_STAGES)):
+        path = root / relative
+        if path.is_file():
+            input_hashes[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
 
     stage_failures = [item for item in blockers if item.startswith("draft stage")]
     content_failures = [
@@ -176,6 +207,9 @@ def evaluate(
         or "label" in item
         or item.startswith("depth manifest")
         or item.startswith("compile record")
+        or "hash is stale" in item
+        or "current source" in item
+        or "baseline hash" in item
     ]
 
     status: str
@@ -194,13 +228,15 @@ def evaluate(
             "automatic compression must continue in the same run"
         )
         status = "CONTINUE_INTERNAL_BUILD_ABOVE_MAX"
+    elif assurance["pass"] is not True:
+        status = "BLOCK_FIRST_DELIVERABLE_ASSURANCE_INCOMPLETE"
     elif blockers:
         status = "BLOCK_FIRST_DELIVERABLE_INCOMPLETE"
     else:
         status = "PASS_FIRST_DELIVERABLE_DRAFT"
 
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "status": status,
         "pass": status == "PASS_FIRST_DELIVERABLE_DRAFT",
@@ -209,21 +245,27 @@ def evaluate(
         "body_pages": body_pages,
         "total_pdf_pages": total_pages,
         "pdf_sha256": pdf_sha256,
+        "tex_sha256": assurance["tex_sha256"],
+        "assurance": assurance,
+        "input_sha256": input_hashes,
+        "compile_manifest": compile_binding,
         "hard_max": high,
         "compile_iteration_count": len(iterations) if isinstance(iterations, list) else 0,
         "required_draft_stages": list(REQUIRED_DRAFT_STAGES),
         "prewrite_ready": content_result.get("prewrite_ready") is True,
         "content_complete": content_result.get("content_complete") is True,
-        "build_status": latest.get("build_status") if latest else None,
+        "build_status": "FIRST_DRAFT_CANDIDATE" if status == "PASS_FIRST_DELIVERABLE_DRAFT" else expected_build_status,
+        "recorded_build_status": latest.get("build_status") if latest else None,
         "recorded_deliverable": latest.get("deliverable") if latest else False,
         "deliverable": status == "PASS_FIRST_DELIVERABLE_DRAFT",
         "blockers": list(dict.fromkeys(blockers)),
         "next_action": (
             "Do not expose this build as a draft or version. In the same generation run, "
-            "return to each recorded substantive gap, close it, compile twice, record the "
-            "new PDF, and rerun this gate automatically."
+            "close recorded content gaps and complete expression, semantic, language, originality "
+            "and truthful AI-use reviews. Compile twice after edits, refresh the current-source/PDF "
+            "bindings, and rerun this gate. Never fabricate reviewer or participant approval."
             if status != "PASS_FIRST_DELIVERABLE_DRAFT"
-            else "This is the first deliverable draft; it may advance to de-AI editing, language audit, recompilation, and final review."
+            else "This reviewed first draft may be shown to the user and advance to independent final review. Participant verification and official submission readiness remain separate; changes invalidate the affected reviews."
         ),
     }
 

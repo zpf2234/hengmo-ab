@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -76,13 +77,16 @@ def run_case(script: Path, root: Path, expected_pass: bool, expected_pattern: st
     }
     actual_pass = completed.returncode == 0 and report.get("pass") is True
     pattern_pass = expected_pattern is None or expected_pattern in patterns
+    source_hash = hashlib.sha256((root / "论文/论文.tex").read_bytes()).hexdigest()
+    source_bound = report.get("paper_source") == {"path": "论文/论文.tex", "sha256": source_hash}
     return {
         "expected_pass": expected_pass,
         "actual_pass": actual_pass,
         "expected_pattern": expected_pattern,
         "patterns": sorted(value for value in patterns if isinstance(value, str)),
         "soft_patterns": sorted(value for value in soft_patterns if isinstance(value, str)),
-        "pass": actual_pass == expected_pass and pattern_pass,
+        "pass": actual_pass == expected_pass and pattern_pass and source_bound,
+        "source_bound": source_bound,
         "returncode": completed.returncode,
         "hard_count": report.get("hard_count"),
     }

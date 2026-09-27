@@ -92,14 +92,14 @@ def classify_figure_density_reference(
     return "WITHIN_REFERENCE"
 
 
-def is_generic_problem_heading(title: str) -> bool:
-    """Identify headings that only restate a question number and generic work."""
+def heading_review_warnings(level: str, title: str) -> list[str]:
+    """Contextual review only; common headings and length never block delivery."""
     compact = re.sub(r"[\s：:、，,。；;]+", "", title)
-    return bool(re.fullmatch(
-        r"问题[一二三四五六七八九十\d]+(?:的)?(?:模型的?)?"
-        r"(?:建立与求解|建模与求解|求解与分析|模型求解|求解)",
-        compact,
-    ))
+    if compact in {"进一步讨论", "一些分析", "相关说明"}:
+        return [f"review {level} title in context: {title}"]
+    if re.search(r"全参数|无偏|正交|收敛|全局|唯一|充要|物理定论", title):
+        return [f"review evidence for {level} title claim: {title}"]
+    return []
 
 
 def validate_provenance(root: Path, item: dict) -> list[str]:
@@ -1057,9 +1057,7 @@ def main() -> int:
         if re.search(r"验证|检验|稳健|灵敏度|误差", match.group("title"))
         and "问题" not in match.group("title")
     ]
-    if not validation_sections:
-        hard.append("independent comprehensive validation section missing")
-    else:
+    if validation_sections:
         validation_text = "\n".join(
             match.group("body") for match in validation_sections
         )
@@ -1076,31 +1074,15 @@ def main() -> int:
             if re.search(pattern, validation_text)
         ]
         if len(evidence_found) < 2:
-            hard.append(
-                "comprehensive validation section contains fewer than two "
-                "cross-problem evidence types"
+            warnings.append(
+                "review whether the validation section adds information beyond local checks"
             )
 
-    generic_titles = {
-        "模型的建立",
-        "模型建立",
-        "算法的实施",
-        "算法实施",
-        "计算结果",
-        "结果显示",
-        "进一步讨论",
-        "一些分析",
-        "相关说明",
-    }
     for level, title in re.findall(
-        r"\\(section|subsection)\{([^}]+)\}",
+        r"\\(section|subsection|subsubsection)\{([^}]+)\}",
         body_text_for_style,
     ):
-        compact_title = re.sub(r"[\s：:、，,。；;]+", "", title)
-        if compact_title in generic_titles or is_generic_problem_heading(title):
-            hard.append(
-                f"generic {level} title lacks problem information: {title}"
-            )
+        warnings.extend(heading_review_warnings(level, title))
 
     if re.search(
         r"\\(?:subsubsubsection|subparagraph)\{",

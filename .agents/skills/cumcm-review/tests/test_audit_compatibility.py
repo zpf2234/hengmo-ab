@@ -195,3 +195,33 @@ def test_scientific_gate_patterns_are_not_weakened():
     assert "question-depth PDF SHA-256 does not match current PDF" in source
     assert "scorecard dimension lacks evidence" in source
     assert "provenance input SHA-256 mismatch or missing" in source
+
+
+
+def test_common_titles_and_local_validation_do_not_hide_missing_evidence(tmp_path: Path):
+    import json
+    import os
+    import subprocess
+    import sys
+
+    (tmp_path / "论文").mkdir()
+    for validation in ("", r"\section{综合验证}共享参数的误差传播如下。"):
+        tex = (
+            r"\title{测量结果分析}\begin{document}\begin{abstract}厚度为7.46。\end{abstract}"
+            r"\section{问题重述}测量厚度。\section{问题分析}分析误差。"
+            r"\section{模型假设}温度稳定。\section{符号说明}符号 & 含义 & 单位 \\"
+            r"\section{模型的建立与求解}\subsection{问题一模型的建立与求解}"
+            r"\subsubsection{全参数回收检验}厚度为7.46。\subsection{计算结果}独立复算相差0.01。"
+            + validation + r"\end{document}"
+        )
+        (tmp_path / "论文/论文.tex").write_text(tex, encoding="utf-8")
+        proc = subprocess.run(
+            [sys.executable, "-B", "-X", "utf8", str(SCRIPT), "--root", str(tmp_path), "--no-write"],
+            capture_output=True, text=True, encoding="utf-8", timeout=60,
+            env=dict(os.environ, PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1"),
+        )
+        assert proc.returncode == 1, proc.stderr
+        report = json.loads(next(line for line in proc.stdout.splitlines() if line.startswith("{")))
+        assert "求解/证据矩阵.csv missing" in report["hard_errors"]
+        assert not any("generic " in item or "comprehensive validation" in item for item in report["hard_errors"])
+        assert any("全参数回收" in item for item in report["warnings"])

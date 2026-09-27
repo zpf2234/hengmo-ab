@@ -19,8 +19,9 @@
 
 ## 一手语料对照与雷点自查
 
-按 [corpus-alignment.md](corpus-alignment.md) 执行：定题前从
-`最终效果/高教杯优秀论文/题目普查/all_paper_titles.md` 通读同题型题名，只比较对象词、
+按 [corpus-alignment.md](corpus-alignment.md) 执行：先读
+[已核对标题样例](verified-title-examples.md)。原 `all_paper_titles.md` 仅作定位索引，新增样例
+须核对原 PDF 标题页，不用摘要误识别项或未清洗统计指导命名。只比较对象词、
 动作词和方法词的组织方式；定稿前对照
 `题目普查/AB优秀论文题目命名十大雷点与写作禁忌.md` 逐条自查（假大空、方法词未兑现、
 照抄赛题名、超长复句、主客体倒置、口语化）。材料缺失时跳过。

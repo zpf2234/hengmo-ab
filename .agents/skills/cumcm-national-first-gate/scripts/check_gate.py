@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import sys
 from datetime import datetime, timezone
@@ -122,19 +123,32 @@ def main() -> int:
                         (reproduction,"复现抽查"),(blind,"盲测"),(independent,"独立评审")):
         pass_field(data, label, issues)
 
+    # Revalidate current first-delivery inputs. A stale chain-audit `pass:true` is
+    # not an authorization to skip the source/build/review linkage.
+    chain_owner = Path(__file__).resolve().parents[2] / "cumcm-paper/scripts/audit_section_chain.py"
+    try:
+        chain_spec = importlib.util.spec_from_file_location("cumcm_current_chain", chain_owner)
+        if chain_spec is None or chain_spec.loader is None:
+            raise ImportError("cannot load current chain validator")
+        chain_module = importlib.util.module_from_spec(chain_spec)
+        chain_spec.loader.exec_module(chain_module)
+        issues.extend(chain_module.validate_first_draft_gate(root))
+    except (ImportError, OSError, AttributeError, ValueError) as exc:
+        issues.append(f"当前初稿与审查绑定无法核验：{exc}")
+
     if benchmark is not None:
-        # Consume the owner's recorded verdict (benchmark_corpus.py validates manual review
-        # and blocks manual release of high similarity); do not re-derive a weaker rule here.
-        gate = benchmark.get("originality_gate")
-        verdict = gate.get("verdict") if isinstance(gate, dict) else None
-        if verdict is not None:
-            if verdict not in ("PASS", "PASS_WITH_MANUAL_REVIEW"):
-                issues.append(f"优秀论文对标/原创性裁定未放行：{verdict}")
-        else:
-            similarity = benchmark.get("similarity", {})
-            status = similarity.get("status") if isinstance(similarity, dict) else None
-            if status != "PASS":
-                issues.append("优秀论文对标缺 originality_gate 裁定且相似度实测非 PASS，原创未证明")
+        # Share the owner's version, full-coverage and current-artifact checks. A bare
+        # legacy PASS must never bypass the stronger first-draft originality gate.
+        owner = Path(__file__).resolve().parents[2] / "cumcm/scripts/benchmark_corpus.py"
+        try:
+            spec = importlib.util.spec_from_file_location("cumcm_originality_owner", owner)
+            if spec is None or spec.loader is None:
+                raise ImportError("cannot load originality owner")
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            issues.extend(module.originality_report_issues(benchmark, root / "论文/论文.pdf"))
+        except (ImportError, OSError, AttributeError) as exc:
+            issues.append(f"原创性校验器不可用，不能放行：{exc}")
     actions = root / "审查" / "REVISION_ACTIONS.md"
     if not actions.is_file():
         issues.append("missing: 审查/REVISION_ACTIONS.md")

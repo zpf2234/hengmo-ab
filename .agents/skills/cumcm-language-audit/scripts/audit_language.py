@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -70,9 +71,9 @@ def load_files(root: Path, manifest_path: Path, explicit: list[str]) -> list[Pat
     )
 
 
-def auditable_text(path: Path) -> str:
+def auditable_text(path: Path, source_text: str | None = None) -> str:
     """Return abstract/main-body text while excluding the AI declaration and later matter."""
-    text = strip_comments(path.read_text(encoding="utf-8", errors="replace"))
+    text = strip_comments(source_text if source_text is not None else path.read_text(encoding="utf-8", errors="replace"))
     return re.split(
         r"\\label\{ai-statement:start\}|\\section\*?\{AI\s*工具使用声明\}|"
         r"\\begin\{thebibliography\}|\\bibliography\{|\\appendix\b",
@@ -81,8 +82,8 @@ def auditable_text(path: Path) -> str:
     )[0]
 
 
-def scan(path: Path, patterns: dict[str, str]) -> list[dict[str, object]]:
-    text = auditable_text(path)
+def scan(path: Path, patterns: dict[str, str], source_text: str | None = None) -> list[dict[str, object]]:
+    text = auditable_text(path, source_text)
     findings: list[dict[str, object]] = []
     for name, pattern in patterns.items():
         for match in re.finditer(pattern, text, flags=re.IGNORECASE):
@@ -104,14 +105,21 @@ def main() -> int:
     files = load_files(root, manifest, args.files)
     records = []
     missing = []
+    paper_source = None
     for path in files:
         if not path.exists():
             missing.append(str(path.relative_to(root)))
             continue
+        source_bytes = path.read_bytes()
+        source_text = source_bytes.decode("utf-8", errors="replace")
+        source_sha256 = hashlib.sha256(source_bytes).hexdigest()
+        if path.resolve() == root / "论文" / "论文.tex":
+            paper_source = {"path": "论文/论文.tex", "sha256": source_sha256}
         records.append({
             "file": str(path.relative_to(root)),
-            "hard": scan(path, HARD_PATTERNS),
-            "soft": scan(path, SOFT_PATTERNS),
+            "source_sha256": source_sha256,
+            "hard": scan(path, HARD_PATTERNS, source_text),
+            "soft": scan(path, SOFT_PATTERNS, source_text),
         })
 
     hard_count = sum(len(item["hard"]) for item in records)
@@ -124,6 +132,7 @@ def main() -> int:
         "hard_count": hard_count,
         "soft_count": soft_count,
         "manual_review_required": True,
+        "paper_source": paper_source,
         "records": records,
     }
 

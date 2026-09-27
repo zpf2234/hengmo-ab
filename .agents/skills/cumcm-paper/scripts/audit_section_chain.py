@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -21,6 +22,7 @@ REQUIRED_STAGES = [
     "evaluation",
     "references",
     "abstract",
+    "deai",
     "language-audit",
 ]
 OPTIONAL_STAGES = ["appendix"]
@@ -58,17 +60,6 @@ def nonempty_text(value: object) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
-def generic_question_title(value: object) -> bool:
-    """Reject per-question headings that name only the question and a generic action."""
-    if not isinstance(value, str):
-        return False
-    compact = re.sub(r"[\s：:、，,。；;]+", "", value)
-    return bool(re.fullmatch(
-        r"问题[一二三四五六七八九十\d]+(?:的)?(?:模型的?)?"
-        r"(?:建立与求解|建模与求解|求解与分析|模型求解|求解)",
-        compact,
-    ))
-
 
 def validate_question_architecture(manifest: dict) -> list[str]:
     errors: list[str] = []
@@ -102,10 +93,6 @@ def validate_question_architecture(manifest: dict) -> list[str]:
             errors.append(f"{label}: planned_subsections contains an empty title")
         elif len(subsections) != len(set(subsections)):
             errors.append(f"{label}: planned_subsections contains duplicate titles")
-        elif any(generic_question_title(value) for value in subsections):
-            errors.append(
-                f"{label}: planned_subsections must not repeat the question number and generic chapter action"
-            )
         if chain_type == "custom" and not nonempty_text(item.get("custom_chain")):
             errors.append(f"{label}: custom_chain is required for custom chain_type")
         inheritance = item.get("inheritance")
@@ -152,7 +139,7 @@ def validate_gate(root: Path, stage: str, spec: dict) -> list[str]:
         if not check.get("id") or check.get("pass") is not True or not check.get("evidence"):
             errors.append(f"{stage}: incomplete or failed check: {check.get('id', '<missing>')}")
     source_files = spec.get("source_files", gate.get("source_files", []))
-    if stage not in {"outline", "language-audit"} and not source_files:
+    if stage not in {"outline", "deai", "language-audit"} and not source_files:
         errors.append(f"{stage}: no source_files recorded")
     for item in source_files:
         if not (root / item).exists():
@@ -191,8 +178,8 @@ def validate_cross_audit(root: Path, kind: str) -> list[str]:
     return errors
 
 
-def validate_first_draft_gate(root: Path) -> list[str]:
-    """Require the first-deliverable checkpoint and reject failed-build identity drift."""
+def validate_first_draft_gate(root: Path, *, measurements: dict | None = None) -> list[str]:
+    """Require a current reviewed checkpoint; measurements injection is for fixtures only."""
     path = root / FIRST_DRAFT_GATE_REL
     if not path.exists():
         return [f"first-draft gate not found: {FIRST_DRAFT_GATE_REL}"]
@@ -201,8 +188,22 @@ def validate_first_draft_gate(root: Path) -> list[str]:
     except Exception as exc:  # noqa: BLE001
         return [f"invalid first-draft gate JSON: {exc}"]
     errors: list[str] = []
-    if gate.get("schema_version") != 1:
-        errors.append("first-draft gate schema_version must be 1")
+    if measurements is None:
+        depth_script = Path(__file__).resolve().parent / "audit_question_depth.py"
+        depth_spec = importlib.util.spec_from_file_location("question_depth_for_final_chain", depth_script)
+        if not depth_spec or not depth_spec.loader:
+            errors.append("cannot load current compilation verifier")
+        else:
+            depth_module = importlib.util.module_from_spec(depth_spec)
+            depth_spec.loader.exec_module(depth_module)
+            measurements, compilation_errors = depth_module.measure_compilation(root)
+            errors.extend(compilation_errors)
+    if not isinstance(measurements, dict) or measurements.get("compilation_binding_verified") is not True:
+        errors.append("first-draft gate requires a verified compilation of current source and dependencies")
+    elif measurements.get("compile_manifest") != gate.get("compile_manifest"):
+        errors.append("first-draft gate controlled compilation manifest is stale")
+    if gate.get("schema_version") != 2:
+        errors.append("first-draft gate schema_version must be 2 (reviewed first draft)")
     if gate.get("status") != "PASS_FIRST_DELIVERABLE_DRAFT" or gate.get("pass") is not True:
         errors.append(f"first-draft gate did not release: {gate.get('status')}")
     if gate.get("build_status") != "FIRST_DRAFT_CANDIDATE":
@@ -218,9 +219,53 @@ def validate_first_draft_gate(root: Path) -> list[str]:
         digest = hashlib.sha256(pdf.read_bytes()).hexdigest()
         if gate.get("pdf_sha256") != digest:
             errors.append("first-draft gate PDF hash does not match current 论文/论文.pdf")
+    tex = root / "论文" / "论文.tex"
+    if not tex.is_file() or gate.get("tex_sha256") != hashlib.sha256(tex.read_bytes()).hexdigest():
+        errors.append("first-draft gate TeX hash does not match current 论文/论文.tex")
+    elif isinstance(measurements, dict) and measurements.get("tex_sha256") != gate.get("tex_sha256"):
+        errors.append("first-draft gate compiled TeX hash does not match current source")
+    bound_inputs = gate.get("input_sha256")
+    if not isinstance(bound_inputs, dict) or not bound_inputs:
+        errors.append("first-draft gate lacks source/review input hash bindings")
+    else:
+        for relative, expected in bound_inputs.items():
+            path_input = (root / relative).resolve()
+            if not path_input.is_relative_to(root.resolve()) or not path_input.is_file() or hashlib.sha256(path_input.read_bytes()).hexdigest() != expected:
+                errors.append(f"first-draft gate input changed or missing: {relative}")
+    script = Path(__file__).resolve().parent / "first_draft_assurance.py"
+    spec = importlib.util.spec_from_file_location("first_draft_assurance_for_chain", script)
+    if not spec or not spec.loader:
+        errors.append("cannot load first-draft assurance checker")
+    else:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        current = module.evaluate_assurance(root, hashlib.sha256(pdf.read_bytes()).hexdigest() if pdf.is_file() else None)
+        if current["pass"] is not True:
+            errors.extend(current["errors"])
+        recorded = gate.get("assurance")
+        if not isinstance(recorded, dict) or recorded.get("pass") is not True or recorded.get("input_sha256") != current["input_sha256"]:
+            errors.append("first-draft assurance record is absent or stale")
     high = gate.get("hard_max")
     if not isinstance(high, int) or isinstance(high, bool) or not (1 <= high <= 30):
         errors.append("first-draft gate page policy exceeds the official 30-page maximum")
+    current_high = 30
+    try:
+        state = read_json(root / ".cumcm_state.json")
+        policy = state.get("page_policy") if isinstance(state, dict) else None
+        configured = policy.get("body_page_max") if isinstance(policy, dict) else None
+        if isinstance(configured, int) and not isinstance(configured, bool) and 1 <= configured <= 30:
+            current_high = configured
+    except (OSError, ValueError):
+        errors.append("current first-draft page policy cannot be read")
+    if high != current_high:
+        errors.append("first-draft gate page policy no longer matches current policy")
+    if isinstance(measurements, dict):
+        current_pages = measurements.get("body_pages")
+        if not isinstance(current_pages, int) or isinstance(current_pages, bool) or not 1 <= current_pages <= current_high:
+            errors.append("first-draft gate current compiled body pages exceed policy or are unavailable")
+        for key in ("body_pages", "total_pdf_pages", "pdf_sha256"):
+            if gate.get(key) != measurements.get(key):
+                errors.append(f"first-draft gate current compiled measurements changed: {key}")
     return errors
 
 
@@ -256,6 +301,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
     parser.add_argument("--manifest", default="审查/section-chain/manifest.json")
+    parser.add_argument("--phase", choices=("content", "final"), default="final")
+    parser.add_argument("--no-write", action="store_true")
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
@@ -277,7 +324,8 @@ def main() -> int:
         errors.append("manifest question_ids is empty")
     errors.extend(validate_question_architecture(manifest))
     stages = manifest.get("stages", {})
-    for stage in REQUIRED_STAGES:
+    required_stages = [stage for stage in REQUIRED_STAGES if args.phase == "final" or stage not in {"deai", "language-audit"}]
+    for stage in required_stages:
         spec = stages.get(stage)
         if not spec:
             errors.append(f"missing stage: {stage}")
@@ -288,7 +336,8 @@ def main() -> int:
         if spec and spec.get("applicable", True) is not False:
             errors.extend(validate_gate(root, stage, spec))
 
-    errors.extend(validate_first_draft_gate(root))
+    if args.phase == "final":
+        errors.extend(validate_first_draft_gate(root))
     errors.extend(validate_formula_readability(root))
 
     cross = manifest.get("cross_cutting", {})
@@ -300,7 +349,9 @@ def main() -> int:
             errors.extend(validate_cross_audit(root, kind))
 
     auto_language = root / "审查" / "section-chain" / "language-audit.json"
-    if not auto_language.exists():
+    if args.phase == "content":
+        pass  # Internal compilation must precede final, PDF-bound language assurance.
+    elif not auto_language.exists():
         errors.append("automatic language audit report not found")
     else:
         try:
@@ -311,25 +362,28 @@ def main() -> int:
 
     result = {
         "schema_version": 1,
+        "phase": args.phase,
         "pass": not errors,
         "manifest": args.manifest,
-        "required_stages": REQUIRED_STAGES,
+        "required_stages": required_stages,
         "optional_stages": OPTIONAL_STAGES,
         "first_draft_gate": FIRST_DRAFT_GATE_REL,
         "formula_readability_audit": FORMULA_READABILITY_REL,
         "errors": errors,
     }
     out_dir = root / "审查" / "section-chain"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "chain-audit.json").write_text(
-        json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    if not args.no_write:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / f"chain-audit{'-content' if args.phase == 'content' else ''}.json").write_text(
+            json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
     lines = ["# 章节技能链审计", "", f"- 结果：{'PASS' if result['pass'] else 'FAIL'}", ""]
     if errors:
         lines.extend(["## 阻断项", "", *[f"- {item}" for item in errors], ""])
     else:
         lines.extend(["全部阶段门禁、源文件和语言审计均已通过。", ""])
-    (out_dir / "chain-audit.md").write_text("\n".join(lines), encoding="utf-8")
+    if not args.no_write:
+        (out_dir / f"chain-audit{'-content' if args.phase == 'content' else ''}.md").write_text("\n".join(lines), encoding="utf-8")
     print(json.dumps({"pass": result["pass"], "error_count": len(errors)}, ensure_ascii=False))
     return 0 if result["pass"] else 1
 

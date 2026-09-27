@@ -22,16 +22,19 @@
 2. 写作阶段的结构与风格对照优先选非同题篇目；同题篇目只有在
    `审查/盲测冻结清单.json`（由 `cumcm-blind-benchmark/scripts/freeze_submission.py` 生成，
    `status: FROZEN_BEFORE_REFERENCE`）已存在后才可用于结构对照，且只比较章节职责与信息密度。
-3. 成稿后必须运行 `python .agents/skills/cumcm/scripts/benchmark_corpus.py --check 论文`；
-   `originality_gate.verdict` 非 pass 时重写相关段落，不做机械同义替换。
+3. 首次交付前运行 `python .agents/skills/cumcm/scripts/benchmark_corpus.py --root . --fail-on-similarity`；
+   仅当前产物与审查依据绑定有效的 `PASS` 或 `PASS_WITH_MANUAL_REVIEW` 可放行。
+   高相似度时核对来源并独立重写论证；覆盖缺口先补文本或报告未证明，不做机械同义替换。
+4. 冻结后开放同题材料只适用于已经结束赛题的训练与评估。正在进行的正式竞赛，不得访问当届
+   解题讨论或其他队伍方案，也不得委托另一代理获取；本队冻结结果不解除该限制。
 
 ## 阶段路由表
 
 | 写作阶段 | 一手对照材料 | 雷点负面清单 |
 |---|---|---|
-| 封面标题（`paper-title.md`） | `题目普查/all_paper_titles.md` | `题目普查/AB优秀论文题目命名十大雷点与写作禁忌.md` |
+| 封面标题（`paper-title.md`） | 先读 [已核对样例](verified-title-examples.md)；`题目普查/all_paper_titles.md` 仅作索引并回查原页 | `题目普查/AB优秀论文题目命名十大雷点与写作禁忌.md` |
 | 摘要（`cumcm-paper → cumcm-abstract/STAGE.md`） | `摘要普查/all_paper_abstracts.md` | `摘要普查/AB优秀论文摘要十大雷点与写作禁忌.md` |
-| 标题树（`cumcm-paper → cumcm-outline/STAGE.md`） | `标题结构普查/all_paper_outlines.md` | `标题结构普查/AB优秀论文标题结构十大雷点与写作禁忌.md` |
+| 标题树（`cumcm-paper → cumcm-outline/STAGE.md`） | [已核对样例](verified-title-examples.md)；`标题结构普查/all_paper_outlines.md` 仅作索引并回查原页 | `标题结构普查/AB优秀论文标题结构十大雷点与写作禁忌.md` |
 | 流程图（`cumcm-diagrams`） | `流程图普查/AB优秀论文流程图汇总.md`、`流程图普查/all_paper_flowcharts.md` | `流程图普查/AB优秀论文流程图十大雷点与写作禁忌.md` |
 | 附录（`cumcm-paper → cumcm-appendix/STAGE.md`） | `附录普查/all_paper_appendixes.md` | `附录普查/AB优秀论文附录十大雷点与写作禁忌.md` |
 | 逐问正文（模型成文阶段、`cumcm-results-validation`） | `全文脉络普查/question_chain_inventory.csv` | 使用既有内容标准，无独立雷点文件 |
@@ -46,7 +49,8 @@
    对象词的占比）、优秀论文不写什么；
 3. 初稿完成后对照对应雷点清单逐条自查，命中即改，并在阶段门禁 JSON 中记录
    `mine_checklist: pass`；
-4. 对照期间禁止把语料句子摘录进草稿；连续 15 字以上与语料一致即按复制处理。
+4. 对照期间禁止把语料论证句子摘录进草稿；连续 15 字以上重合优先复核来源、语境与必要性，
+   非必要论证长句复用须独立重写，标准术语或正确引用不靠换符号、换词来制造差异。
 
 ## 已知口径矛盾裁定
 

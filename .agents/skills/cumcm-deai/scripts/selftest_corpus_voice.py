@@ -2,17 +2,18 @@
 """Self-test for audit_corpus_voice.py.
 
 Verifies both directions of the gate: natural corpus-like prose passes, and each
-statistical AI-slop signal (isomorphic paragraph openings, uniform sentence
-rhythm, connector flooding) hard-fails on its own. Also verifies fail-closed
+statistical prose signal (isomorphic paragraph openings, uniform sentence
+rhythm, connector flooding) requires review without automatic rejection. Also verifies fail-closed
 behaviour on empty projects, soft-only findings not blocking, and baseline
 source reporting for both corpus-present and corpus-missing roots. Problem-
 analysis cases additionally verify content-led openings and deterministic
-rejection of repeated four-step/purpose-method scaffolds.
+review of repeated four-step/purpose-method scaffolds.
 """
 
 from __future__ import annotations
 
 import json
+import hashlib
 import subprocess
 import sys
 import tempfile
@@ -173,33 +174,33 @@ def _(tmp: Path) -> tuple[bool, str]:
     return ok, f"exit={code} pass={report.get('pass')} hard={report.get('hard_count')} soft={report.get('soft_count')}"
 
 
-@case("isomorphic_paragraphs_hard_fail")
+@case("isomorphic_paragraphs_require_review")
 def _(tmp: Path) -> tuple[bool, str]:
     root = tmp / "iso"
     write_project(root, "model.tex", ISO_TEX)
     code, report = run_audit(root)
-    findings = "".join(str(r.get("hard")) for r in report.get("records", []))
-    ok = code == 1 and report.get("pass") is False and "iso_pairs" in findings
+    findings = "".join(str(r.get("soft")) for r in report.get("records", []))
+    ok = code == 0 and report.get("soft_count", 0) > 0 and "iso_pairs" in findings
     return ok, f"exit={code} hard={report.get('hard_count')}"
 
 
-@case("uniform_sentences_hard_fail")
+@case("uniform_sentences_require_review")
 def _(tmp: Path) -> tuple[bool, str]:
     root = tmp / "uniform"
     write_project(root, "model.tex", UNIFORM_TEX)
     code, report = run_audit(root)
-    findings = "".join(str(r.get("hard")) for r in report.get("records", []))
-    ok = code == 1 and "sentence_cv" in findings
+    findings = "".join(str(r.get("soft")) for r in report.get("records", []))
+    ok = code == 0 and "sentence_cv" in findings
     return ok, f"exit={code} findings={findings[:80]}"
 
 
-@case("connector_flood_hard_fail")
+@case("connector_flood_requires_review")
 def _(tmp: Path) -> tuple[bool, str]:
     root = tmp / "conn"
     write_project(root, "model.tex", CONNECTOR_TEX)
     code, report = run_audit(root)
-    findings = "".join(str(r.get("hard")) for r in report.get("records", []))
-    ok = code == 1 and "conn_density" in findings
+    findings = "".join(str(r.get("soft")) for r in report.get("records", []))
+    ok = code == 0 and "conn_density" in findings
     return ok, f"exit={code} findings={findings[:80]}"
 
 
@@ -222,15 +223,15 @@ def _(tmp: Path) -> tuple[bool, str]:
     )
 
 
-@case("templated_analysis_hard_fails")
+@case("templated_analysis_requires_review")
 def _(tmp: Path) -> tuple[bool, str]:
     root = tmp / "analysis_template"
     write_project(root, "论文.tex", TEMPLATE_ANALYSIS_TEX)
     code, report = run_audit(root)
     record = next((r for r in report.get("records", []) if r.get("analysis_narrative")), {})
-    findings = "".join(str(item) for item in record.get("hard", []))
+    findings = "".join(str(item) for item in record.get("soft", []))
     expected = ("purpose_method_questions", "triple_sequence_questions", "fixed_four_step_questions")
-    ok = code == 1 and all(item in findings for item in expected)
+    ok = code == 0 and all(item in findings for item in expected)
     return ok, f"exit={code} findings={findings[:160]}"
 
 
@@ -258,16 +259,16 @@ def _(tmp: Path) -> tuple[bool, str]:
     )
 
 
-@case("cross_question_purpose_repeat_hard_fails")
+@case("cross_question_purpose_repeat_requires_review")
 def _(tmp: Path) -> tuple[bool, str]:
     root = tmp / "analysis_cross_question_purpose"
     write_project(root, "论文.tex", CROSS_QUESTION_PURPOSE_REPEAT_TEX)
     code, report = run_audit(root)
     record = next((r for r in report.get("records", []) if r.get("analysis_narrative")), {})
     analysis = record.get("analysis_narrative", {})
-    hard = "".join(str(item) for item in record.get("hard", []))
+    hard = "".join(str(item) for item in record.get("soft", []))
     ok = (
-        code == 1
+        code == 0
         and analysis.get("purpose_method_hits") == 2
         and analysis.get("purpose_method_questions") == 2
         and "purpose_method_questions=2" in hard
@@ -366,6 +367,21 @@ def _(tmp: Path) -> tuple[bool, str]:
     found = [needle for needle in forbidden if needle in joined]
     ok = not missing and not found
     return ok, f"missing={missing} forbidden={found}"
+
+
+@case("master_source_digest_tracks_scanned_bytes")
+def _(tmp: Path) -> tuple[bool, str]:
+    root = tmp / "master_binding"
+    write_project(root, "论文.tex", CLEAN_TEX)
+    source = root / "论文/论文.tex"
+    code, first = run_audit(root)
+    first_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+    first_ok = code == 0 and first.get("paper_source") == {"path": "论文/论文.tex", "sha256": first_hash}
+    write_project(root, "论文.tex", CLEAN_TEX.replace("0.435", "0.436"))
+    code, second = run_audit(root)
+    second_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+    second_ok = code == 0 and second.get("paper_source") == {"path": "论文/论文.tex", "sha256": second_hash}
+    return first_ok and second_ok and first_hash != second_hash, "source hash follows the exact scanned master bytes"
 
 
 def main() -> int:

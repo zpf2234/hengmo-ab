@@ -14,6 +14,7 @@ from typing import Any
 
 SCHEMA_VERSION = 1
 DEFAULT_RECORD = "审查/用户确认节点.json"
+STATE_FILE = ".cumcm_state.json"
 STAGES = ("method-result", "outline-page")
 
 
@@ -29,10 +30,27 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def initial_record() -> dict[str, Any]:
+def project_workflow_mode(root: Path) -> str:
+    state_path = root / STATE_FILE
+    if not state_path.is_file():
+        return "semi-automatic"
+    try:
+        state = read_json(state_path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return "semi-automatic"
+    policy = state.get("workflow_policy")
+    if isinstance(policy, dict) and policy.get("mode") == "simulation":
+        return "simulation"
+    if state.get("workflow_mode") == "simulation":
+        return "simulation"
+    return "semi-automatic"
+
+
+def initial_record(root: Path) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "mode": "semi-automatic",
+        "workflow_mode": project_workflow_mode(root),
         "method_result_confirmation": {"status": "pending"},
         "outline_page_confirmation": {"status": "pending"},
     }
@@ -107,12 +125,23 @@ def main() -> int:
 
     if args.init:
         existed = record_path.exists()
-        payload = initial_record()
+        payload = initial_record(root)
         if existed:
             payload = read_json(record_path)
         elif not args.no_write:
             write_json(record_path, payload)
         print(json.dumps({"pass": True, "created": not existed and not args.no_write}, ensure_ascii=False))
+        return 0
+
+    if args.phase and project_workflow_mode(root) == "simulation":
+        required = ["method-result"] if args.phase == "paper-plan" else list(STAGES)
+        print(json.dumps({
+            "pass": True,
+            "phase": args.phase,
+            "mode": "simulation",
+            "confirmation_required": False,
+            "skipped_confirmations": required,
+        }, ensure_ascii=False))
         return 0
 
     try:

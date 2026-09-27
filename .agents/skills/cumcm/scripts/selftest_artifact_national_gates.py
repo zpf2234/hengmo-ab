@@ -46,12 +46,15 @@ def main() -> int:
         audit.classify_figure_density_reference(0.20, None, None)
         == "REFERENCE_UNAVAILABLE"
     )
-    cases["generic_question_heading_rejected"] = audit.is_generic_problem_heading(
-        "问题一模型的建立与求解"
+    cases["common_question_heading_allowed"] = not audit.heading_review_warnings(
+        "subsection", "问题一模型的建立与求解"
     )
-    cases["specific_question_heading_allowed"] = not audit.is_generic_problem_heading(
-        "盘入速度递推与碰撞时刻定位"
+    cases["common_result_heading_allowed"] = not audit.heading_review_warnings(
+        "subsection", "计算结果"
     )
+    cases["strong_title_claim_needs_review"] = bool(audit.heading_review_warnings(
+        "subsubsection", "全参数无偏回收检验"
+    ))
 
     with tempfile.TemporaryDirectory(prefix="cumcm-artifact-gates-") as tmp:
         root = Path(tmp)

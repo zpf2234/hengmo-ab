@@ -657,7 +657,9 @@ def main() -> int:
 
         root = base / "chain_valid"
         prepare_chain_case(root)
-        cases["chain_valid"] = run_case(chain_script, root, True)
+        # These fixtures isolate visual/content-chain routing, not final release.
+        # Current first-draft assurance is covered by selftest_section_chain_bindings.
+        cases["chain_valid"] = run_case(chain_script, root, True, "--phase", "content")
 
         root = base / "chain_compact_question_without_subsections"
         prepare_chain_case(root)
@@ -666,7 +668,7 @@ def main() -> int:
         manifest["question_architecture"]["q1"]["planned_subsections"] = []
         write_json(manifest_path, manifest)
         cases["chain_compact_question_without_subsections"] = run_case(
-            chain_script, root, True
+            chain_script, root, True, "--phase", "content"
         )
 
         root = base / "chain_generic_question_title"
@@ -677,12 +679,15 @@ def main() -> int:
             "问题一模型的建立与求解", "问题一求解与分析"
         ]
         write_json(manifest_path, manifest)
-        cases["chain_generic_question_title_rejected"] = run_case(chain_script, root, False)
+        cases["chain_generic_question_title_allowed"] = run_case(chain_script, root, True, "--phase", "content")
 
         root = base / "chain_missing_figure_audit"
         prepare_chain_case(root)
         (root / "审查/figure-style-audit.json").unlink()
-        cases["chain_missing_figure_audit"] = run_case(chain_script, root, False)
+        cases["chain_missing_figure_audit"] = run_case(chain_script, root, False, "--phase", "content")
+        errors = json.loads((root / "审查/section-chain/chain-audit-content.json").read_text(encoding="utf-8"))["errors"]
+        cases["chain_missing_figure_audit"]["expected_visual_failure"] = any("figure: automatic style audit report not found" in item for item in errors)
+        cases["chain_missing_figure_audit"]["pass"] &= cases["chain_missing_figure_audit"]["expected_visual_failure"]
 
         root = base / "chain_stale_diagram_audit"
         prepare_chain_case(root)
@@ -690,7 +695,10 @@ def main() -> int:
         registry_path = root / "审查/diagram-registry.json"
         report_time = report.stat().st_mtime
         os.utime(registry_path, (report_time + 5, report_time + 5))
-        cases["chain_stale_diagram_audit"] = run_case(chain_script, root, False)
+        cases["chain_stale_diagram_audit"] = run_case(chain_script, root, False, "--phase", "content")
+        errors = json.loads((root / "审查/section-chain/chain-audit-content.json").read_text(encoding="utf-8"))["errors"]
+        cases["chain_stale_diagram_audit"]["expected_visual_failure"] = any("diagram: style audit is older than its registry" in item for item in errors)
+        cases["chain_stale_diagram_audit"]["pass"] &= cases["chain_stale_diagram_audit"]["expected_visual_failure"]
 
     result = {
         "schema_version": 1,

@@ -1,7 +1,7 @@
 interface:
   display_name: "CUMCM 去 AI 味"
-  short_description: "以优秀论文语料校准中文表达，并保护公式、数值、单位和引用事实"
-  default_prompt: "Use $cumcm-deai to revise CUMCM prose against the local corpus voice while preserving every formula, value, unit, and citation fact."
+  short_description: "以优秀论文语料校准自然表达，并核验数值、公式、引用与研究过程真实性"
+  default_prompt: "Use $cumcm-deai to make CUMCM prose natural and evidence-led while preserving every formula, value, unit, citation, and factual account of the work."
 
 policy:
   allow_implicit_invocation: true

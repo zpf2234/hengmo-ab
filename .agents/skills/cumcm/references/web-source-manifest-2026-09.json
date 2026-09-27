@@ -1,0 +1,186 @@
+{
+  "snapshot_date": "2026-09-05",
+  "scope": "CUMCM A/B 建模、求解、验证、成文与 AI 合规",
+  "refresh_policy": "每年赛前、官网规则变化或本地技能与官方文件冲突时重新核验",
+  "sources": [
+    {
+      "id": "CUMCM-CHARTER-2023",
+      "authority": "official",
+      "publisher": "中国工业与应用数学学会/全国大学生数学建模竞赛组委会",
+      "published": "2023-11-17",
+      "url": "https://www.mcm.edu.cn/html_cn/block/44e92058f537729c6b6a62a3662ee417.html",
+      "use": [
+        "题目来源",
+        "论文组成",
+        "评奖方向"
+      ]
+    },
+    {
+      "id": "CUMCM-FORMAT-2026",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2026-03-03",
+      "url": "https://www.mcm.edu.cn/html_cn/node/4cd596519c9eb9fbd866398f6df0caa3.html",
+      "use": [
+        "论文格式",
+        "正文页数",
+        "匿名",
+        "支撑材料",
+        "引用"
+      ]
+    },
+    {
+      "id": "CUMCM-RULES-2026",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2026-03-03",
+      "effective": "2026-03-01",
+      "url": "https://www.mcm.edu.cn/html_cn/node/9d8e511fe7a1447b35f53a82c908e2e0.html",
+      "use": [
+        "竞赛纪律",
+        "独立完成",
+        "AI 责任"
+      ]
+    },
+    {
+      "id": "CUMCM-AI-2026",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2026-08-03",
+      "effective": "2026-09-01",
+      "url": "https://www.mcm.edu.cn/html_cn/node/fef94648f2836ab6cc81586f4c38512b.html",
+      "use": [
+        "AI 工具范围",
+        "声明",
+        "详情 PDF",
+        "人工核验",
+        "违规后果"
+      ]
+    },
+    {
+      "id": "CUMCM-HOME-2026",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "accessed": "2026-09-05",
+      "url": "https://www.mcm.edu.cn/",
+      "use": [
+        "2026 赛题发布时间",
+        "提交入口提示"
+      ]
+    },
+    {
+      "id": "CUMCM-FOLLOWUP-2026",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2026-03-02",
+      "url": "https://www.mcm.edu.cn/html_cn/node/eaf50aa7b2b31d32ad96994d8ac115e0.html",
+      "use": [
+        "已有方案综述",
+        "新方案比较",
+        "模型/算法创新"
+      ]
+    },
+    {
+      "id": "NASA-STD-7009B",
+      "authority": "method_reference",
+      "publisher": "NASA Office of the Chief Engineer",
+      "version": "B",
+      "document_date": "2024-03-05",
+      "url": "https://standards.nasa.gov/standard/nasa/nasa-std-7009",
+      "use": [
+        "模型可信度",
+        "verification",
+        "validation",
+        "uncertainty"
+      ]
+    },
+    {
+      "id": "NASA-MNS-FAQ",
+      "authority": "method_reference",
+      "publisher": "NASA Kennedy Space Center",
+      "url": "https://public.ksc.nasa.gov/mns/faq/",
+      "use": [
+        "代码验证",
+        "解验证",
+        "现实验证",
+        "适用范围"
+      ]
+    },
+    {
+      "id": "NIST-RESIDUALS",
+      "authority": "method_reference",
+      "publisher": "National Institute of Standards and Technology",
+      "url": "https://www.itl.nist.gov/div898/handbook/pmd/section4/pmd44.htm",
+      "use": [
+        "残差诊断",
+        "模型拟合",
+        "不确定性线索"
+      ]
+    },
+    {
+      "id": "NIST-VVUQ",
+      "authority": "method_reference",
+      "publisher": "National Institute of Standards and Technology",
+      "published": "2020-03-24",
+      "url": "https://www.nist.gov/publications/summary-industrial-verification-validation-and-uncertainty-quantification-procedures",
+      "use": [
+        "物理建模质量",
+        "V&V",
+        "UQ"
+      ]
+    },
+    {
+      "id": "CUMCM-PROBLEM-ARCHIVE",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "accessed": "2026-09-05",
+      "url": "https://www.mcm.edu.cn/html_cn/block/8579f5fce999cdc896f78bca5d4f8237.html",
+      "use": [
+        "历年赛题归档",
+        "2023—2025 A/B 题定位"
+      ]
+    },
+    {
+      "id": "CUMCM-PROBLEMS-2023",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2023-09-07",
+      "url": "https://www.mcm.edu.cn/html_cn/node/c74d72127066f510a5723a94b5323a26.html",
+      "use": [
+        "2023 赛题官方题目页"
+      ]
+    },
+    {
+      "id": "CUMCM-PROBLEMS-2024",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2024-09-05",
+      "url": "https://www.mcm.edu.cn/html_cn/node/a0c1fb5c31d43551f08cd8ad16870444.html",
+      "use": [
+        "2024 赛题官方题目页"
+      ]
+    },
+    {
+      "id": "CUMCM-PROBLEMS-2025",
+      "authority": "official",
+      "publisher": "全国大学生数学建模竞赛组委会",
+      "published": "2025-09-04",
+      "url": "https://www.mcm.edu.cn/html_cn/node/03c91a444e62eee81a3740fa97a461a6.html",
+      "use": [
+        "2025 赛题官方题目页"
+      ]
+    },
+    {
+      "id": "CUMCM-PROBLEMS-MIRROR",
+      "authority": "convenience_mirror",
+      "publisher": "CosmicLinks/cumcm-problems",
+      "commit": "549a57d67332d439ed6fab720ef0431314aee2d6",
+      "accessed": "2026-09-05",
+      "url": "https://github.com/CosmicLinks/cumcm-problems",
+      "use": [
+        "逐题 PDF 与附件便捷下载",
+        "本地题库复现；不覆盖官方出处"
+      ]
+    }
+  ]
+}
